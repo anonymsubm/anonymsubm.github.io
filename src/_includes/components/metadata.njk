@@ -1,0 +1,11 @@
+{% set socialImage = [metadata.url, metadata.image] | join %}
+{% set title = "theodorblackbird webpage" %}
+  
+<meta name="description" content="{{ metadata.description }}">
+<meta name="author" content="{{ metadata.author.name }}">
+
+<meta property="og:title" content="{{ title }}">
+<meta property="og:type" content="website">
+<meta property="og:url" content="">
+<meta property="og:description" content="{{ metadata.description }}">
+
