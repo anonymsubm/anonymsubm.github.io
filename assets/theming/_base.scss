@@ -1,0 +1,83 @@
+* {
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  background-color: $bg-clr;
+  color: $base-clr;
+  font-family: $main-font;
+  font-size: 50%;
+  scroll-behavior: smooth;
+
+  /* Better Font Rendering =========== */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+
+  @include breakpoint-md {
+    font-size: 62.5%;
+  }
+}
+nav {
+  ul {
+    list-style: none;
+  }
+}
+nav ul li {
+  display: inline-block;
+  font-size: 2rem;
+  
+  + li {
+    margin-left: 1.2rem;
+  }
+
+  &.active a {
+    font-weight: 600;
+    text-decoration: underline;
+  }
+
+  a {
+    display: inline-block;
+    text-decoration: none;
+    padding-bottom: 5px;
+    transition: color 400ms;
+  }
+}
+
+#main {
+    margin-left: 10px;
+    margin-right: 10px;
+    margin-top: 40px;
+    margin-bottom: 40px;
+}
+body { 
+    max-width: 750px;
+    line-height: 1.2;
+    font-size: 17px;
+    margin: 0 auto;
+}
+p, li {
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    hyphens: auto;
+    text-align: justify;
+}
+p {
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
+}
+
+audio {
+  controls: "controls";
+  max-width: 110px;
+}
+table {
+  border-collapse: collapse;
+}
+tr {
+  border-bottom: 1px solid #000;
+}
+td {
+  padding: 5px;
+}

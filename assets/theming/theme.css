@@ -1,0 +1,41 @@
+* {
+  margin: 0;
+  padding: 0;
+}
+
+#main {
+    margin-left: 10px;
+    margin-right: 10px;
+    margin-top: 40px;
+    margin-bottom: 40px;
+}
+body { 
+    max-width: 1200px;
+    line-height: 1.2;
+    font-size: 17px;
+    margin: 0 auto;
+}
+p, li {
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    hyphens: auto;
+    text-align: justify;
+}
+p {
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
+}
+
+audio {
+  controls: "controls";
+  max-width: 130px;
+}
+table {
+  border-collapse: collapse;
+}
+tr {
+  border-bottom: 1px solid #000;
+}
+td {
+  padding: 5px;
+}

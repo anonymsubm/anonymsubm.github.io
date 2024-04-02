@@ -1,0 +1,5 @@
+text|prompt|gt|smalle|valle
+And lay me down in thy cold bed and leave my shining lot. |and_lay_me_down_prompt.wav|and_lay_me_down_gt.wav|and_lay_me_down.wav|and_lay_me_down_valle.wav
+Number ten, fresh nelly is waiting on you, good night husband. |number_ten_prompt.wav|number_ten_gt.wav|number_ten.wav|number_ten_valle.wav
+Yea, his honourable worship is within, but he hath a godly minister or two with him, and likewise a leech. |honourable_prompt.wav|honourable_gt.wav|honourable.wav|honourable_valle.wav
+They moved thereafter cautiously about the hut groping before and about them to find something to show that Warrenton had fulfilled his mission. |warrenton_prompt.wav|warrenton_gt.wav|warrenton.wav|warrenton_valle.wav

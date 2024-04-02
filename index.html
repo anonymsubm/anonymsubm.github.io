@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title></title>
+    
+
+  
+<meta name="description" content="">
+<meta name="author" content="">
+
+<meta property="og:title" content="theodorblackbird webpage">
+<meta property="og:type" content="website">
+<meta property="og:url" content="">
+<meta property="og:description" content="">
+
+
+    <script type="module" src="/assets/svg-icon-sprite.js"></script>
+    <link rel="stylesheet" href="/assets/theme.css" />
+  </head>
+
+  <body>
+    
+<header role="banner">
+  <div class="logo">
+  </div>
+  <nav role="navigation" aria-label="main navigation" >
+    <ul></ul>
+  </nav>
+</header>
+
+    <main role="main">
+      <link rel="stylesheet" href="/assets/theming/theme.css" />
+<h1>Small-E Demo page</h1>
+<h2>Abstract:</h2>
+<p>Recent advancements in text-to-speech (TTS) powered by
+language models have showcased remarkable capabilities in
+achieving naturalness and zero-shot voice cloning. Notably,
+the decoder-only transformer is the prominent architecture in
+this domain. However, transformers face challenges stemming
+from their quadratic complexity in sequence length, imped-
+ing training on lengthy sequences and resource-constrained
+hardware. Moreover they lack specific inductive bias with
+regards to the monotonic nature of TTS alignments. In
+response, we propose to replace transformers with emerging
+recurrent architectures and introduce specialized cross-attention
+mechanisms for reducing repeating and skipping issues.
+Consequently our architecture can be efficiently trained on long
+samples and achieve state-of-the-art zero-shot voice cloning
+against baselines of comparable size</p>
+<table >
+    <tr >
+    <th> Model </th>
+    <th> Params. </th>
+    <th> Rel. size</th>
+    <th> Vocoder </th>
+    </tr>
+    <tr>
+    <td> Small-E (ours) </td>
+    <td> 64M </td>
+    <td> 1x </td>
+    <td> Vocos 3kbps </td>
+    </tr>
+    <tr>
+    <td> YourTTS </td>
+    <td> 86M </td>
+    <td> 1.3x </td>
+    <td> End-to-End</td>
+    </tr>
+    <tr>
+    <td> Metavoice</td>
+    <td> 1.2B </td>
+    <td> 18.75x </td>
+    <td> Multiband Diffusion + Postnet</td>
+    </tr>
+<p><tr>
+<td> VALL-E</td>
+<td> 2x150M </td>
+<td> 4.6x </td>
+<td> EnCodec 6kbps</td>
+</tr></p>
+</table>
+<br>
+<br>
+<h3>Comparison with baselines</h3>
+<p>Prompt is the speaker reference given to each model.</p>
+<table>
+    <tr>
+    <th>Text</th>
+    <th>Prompt</th>
+    <th>Small-E (ours)</th>
+    <th>YourTTS</th>
+    <th>Metavoice</th>
+    <th>Ground Truth</th>
+    </tr>
+<p><tr style="border-bottom: 1px solid #000;">
+<td>  The space between his two front teeth, which were unusually far apart, gave him the proficiency in whistling for which he was distinguished at college.</td>
+<td><audio controls=""><source src="/assets/samples/selected_pair/prompt/11_prompt.wav" type="audio/x-wav"></audio></td>
+<td><audio controls=""><source src="/assets/samples/selected_pair/smalle/11_synth.wav" type="audio/x-wav"></audio></td>
+<td><audio controls><source src="/assets/samples/selected_pair/yourtts/11_synth.wav" type="audio/x-wav"></audio></td>
+<td><audio controls><source src="/assets/samples/selected_pair/metavoice/11_synth.wav" type="audio/x-wav"></audio></td>
+<td><audio controls><source src="/assets/samples/selected_pair/target/11_target.wav" type="audio/x-wav"></audio></td>
+</tr></p>
+<p><tr style="border-bottom: 1px solid #000;">
+<td>  Having travelled around the world, I had cultivated an indifference to any special difficulties of that kind.</td>
+<td><audio controls=""><source src="/assets/samples/selected_pair/prompt/12_prompt.wav" type="audio/x-wav"></audio></td>
+<td><audio controls=""><source src="/assets/samples/selected_pair/smalle/12_synth.wav" type="audio/x-wav"></audio></td>
+<td><audio controls><source src="/assets/samples/selected_pair/yourtts/12_synth.wav" type="audio/x-wav"></audio></td>
+<td><audio controls><source src="/assets/samples/selected_pair/metavoice/12_synth.wav" type="audio/x-wav"></audio></td>
+<td><audio controls><source src="/assets/samples/selected_pair/target/12_target.wav" type="audio/x-wav"></audio></td>
+</tr></p>
+<p><tr style="border-bottom: 1px solid #000;">
+<td>  But there are other standards of repute and other, more or less imperative, canons of conduct, besides wealth and its manifestation, and some of these come in to accentuate or to qualify the broad, fundamental canon of conspicuous waste.</td>
+<td><audio controls=""><source src="/assets/samples/selected_pair/prompt/13_prompt.wav" type="audio/x-wav"></audio></td>
+<td><audio controls=""><source src="/assets/samples/selected_pair/smalle/13_synth.wav" type="audio/x-wav"></audio></td>
+<td><audio controls><source src="/assets/samples/selected_pair/yourtts/13_synth.wav" type="audio/x-wav"></audio></td>
+<td><audio controls><source src="/assets/samples/selected_pair/metavoice/13_synth.wav" type="audio/x-wav"></audio></td>
+<td><audio controls><source src="/assets/samples/selected_pair/target/13_target.wav" type="audio/x-wav"></audio></td>
+</tr></p>
+<p><tr style="border-bottom: 1px solid #000;">
+<td>  I suppose Professor Liedenbrock was of my opinion too, and even shared my fears, for after having examined the pick, his eyes traversed the ocean from side to side.</td>
+<td><audio controls=""><source src="/assets/samples/selected_pair/prompt/17_prompt.wav" type="audio/x-wav"></audio></td>
+<td><audio controls=""><source src="/assets/samples/selected_pair/smalle/17_synth.wav" type="audio/x-wav"></audio></td>
+<td><audio controls><source src="/assets/samples/selected_pair/yourtts/17_synth.wav" type="audio/x-wav"></audio></td>
+<td><audio controls><source src="/assets/samples/selected_pair/metavoice/17_synth.wav" type="audio/x-wav"></audio></td>
+<td><audio controls><source src="/assets/samples/selected_pair/target/17_target.wav" type="audio/x-wav"></audio></td>
+</tr></p>
+<p><tr style="border-bottom: 1px solid #000;">
+<td>  Rodolfo was now impatient to get rid of Leocadia, and made up his mind to lay her in the street, insensible as she was.</td>
+<td><audio controls=""><source src="/assets/samples/selected_pair/prompt/20_prompt.wav" type="audio/x-wav"></audio></td>
+<td><audio controls=""><source src="/assets/samples/selected_pair/smalle/20_synth.wav" type="audio/x-wav"></audio></td>
+<td><audio controls><source src="/assets/samples/selected_pair/yourtts/20_synth.wav" type="audio/x-wav"></audio></td>
+<td><audio controls><source src="/assets/samples/selected_pair/metavoice/20_synth.wav" type="audio/x-wav"></audio></td>
+<td><audio controls><source src="/assets/samples/selected_pair/target/20_target.wav" type="audio/x-wav"></audio></td>
+</tr></p>
+<p><tr style="border-bottom: 1px solid #000;">
+<td>  The infamy of this bargain had such an influence on the Scottish parliament, that they once voted that the king should be protected, and his liberty insisted on.</td>
+<td><audio controls=""><source src="/assets/samples/selected_pair/prompt/3_prompt.wav" type="audio/x-wav"></audio></td>
+<td><audio controls=""><source src="/assets/samples/selected_pair/smalle/3_synth.wav" type="audio/x-wav"></audio></td>
+<td><audio controls><source src="/assets/samples/selected_pair/yourtts/3_synth.wav" type="audio/x-wav"></audio></td>
+<td><audio controls><source src="/assets/samples/selected_pair/metavoice/3_synth.wav" type="audio/x-wav"></audio></td>
+<td><audio controls><source src="/assets/samples/selected_pair/target/3_target.wav" type="audio/x-wav"></audio></td>
+</tr></p>
+<p><tr style="border-bottom: 1px solid #000;">
+<td>  The water soon flowed into its bed again, but watching the ground on either side, the foresters pursued their way content with knowing that the trail lay beneath.</td>
+<td><audio controls=""><source src="/assets/samples/selected_pair/prompt/8_prompt.wav" type="audio/x-wav"></audio></td>
+<td><audio controls=""><source src="/assets/samples/selected_pair/smalle/8_synth.wav" type="audio/x-wav"></audio></td>
+<td><audio controls><source src="/assets/samples/selected_pair/yourtts/8_synth.wav" type="audio/x-wav"></audio></td>
+<td><audio controls><source src="/assets/samples/selected_pair/metavoice/8_synth.wav" type="audio/x-wav"></audio></td>
+<td><audio controls><source src="/assets/samples/selected_pair/target/8_target.wav" type="audio/x-wav"></audio></td>
+</tr></p>
+<p><tr style="border-bottom: 1px solid #000;">
+<td>  Hugh MacConnell came with his sister, and stood about, managing his tea cup awkwardly and watching every one out of his deep set, faded eyes.</td>
+<td><audio controls=""><source src="/assets/samples/selected_pair/prompt/93_prompt.wav" type="audio/x-wav"></audio></td>
+<td><audio controls=""><source src="/assets/samples/selected_pair/smalle/93_synth.wav" type="audio/x-wav"></audio></td>
+<td><audio controls><source src="/assets/samples/selected_pair/yourtts/93_synth.wav" type="audio/x-wav"></audio></td>
+<td><audio controls><source src="/assets/samples/selected_pair/metavoice/93_synth.wav" type="audio/x-wav"></audio></td>
+<td><audio controls><source src="/assets/samples/selected_pair/target/93_target.wav" type="audio/x-wav"></audio></td>
+</tr></p>
+</table>
+</tr>
+<table>
+    <tr>
+    <th>Text</th>
+    <th>Prompt</th>
+    <th>Small-E (ours)</th>
+    <th>VALL-E</th>
+    <th>Ground Truth</th>
+    </tr>
+<br>
+<br>
+<br>
+<h3>Comparison with VALL-E</h3>
+<p>We add samples from the demo page of VALL-E since there is no official implementation.</p>
+<p><tr style="border-bottom: 1px solid #000;">
+<td>  And lay me down in thy cold bed and leave my shining lot. </td>
+<td><audio controls=""><source src="/assets/samples/valle/and_lay_me_down_prompt.wav" type="audio/x-wav"></audio></td>
+<td><audio controls=""><source src="/assets/samples/valle/and_lay_me_down.wav" type="audio/x-wav"></audio></td>
+<td><audio controls><source src="/assets/samples/valle/and_lay_me_down_valle.wav" type="audio/x-wav"></audio></td>
+<td><audio controls><source src="/assets/samples/valle/and_lay_me_down_gt.wav" type="audio/x-wav"></audio></td>
+</tr></p>
+<p><tr style="border-bottom: 1px solid #000;">
+<td>  Number ten, fresh nelly is waiting on you, good night husband. </td>
+<td><audio controls=""><source src="/assets/samples/valle/number_ten_prompt.wav" type="audio/x-wav"></audio></td>
+<td><audio controls=""><source src="/assets/samples/valle/number_ten.wav" type="audio/x-wav"></audio></td>
+<td><audio controls><source src="/assets/samples/valle/number_ten_valle.wav" type="audio/x-wav"></audio></td>
+<td><audio controls><source src="/assets/samples/valle/number_ten_gt.wav" type="audio/x-wav"></audio></td>
+</tr></p>
+<p><tr style="border-bottom: 1px solid #000;">
+<td>  Yea, his honourable worship is within, but he hath a godly minister or two with him, and likewise a leech. </td>
+<td><audio controls=""><source src="/assets/samples/valle/honourable_prompt.wav" type="audio/x-wav"></audio></td>
+<td><audio controls=""><source src="/assets/samples/valle/honourable.wav" type="audio/x-wav"></audio></td>
+<td><audio controls><source src="/assets/samples/valle/honourable_valle.wav" type="audio/x-wav"></audio></td>
+<td><audio controls><source src="/assets/samples/valle/honourable_gt.wav" type="audio/x-wav"></audio></td>
+</tr></p>
+<p><tr style="border-bottom: 1px solid #000;">
+<td>  They moved thereafter cautiously about the hut groping before and about them to find something to show that Warrenton had fulfilled his mission. </td>
+<td><audio controls=""><source src="/assets/samples/valle/warrenton_prompt.wav" type="audio/x-wav"></audio></td>
+<td><audio controls=""><source src="/assets/samples/valle/warrenton.wav" type="audio/x-wav"></audio></td>
+<td><audio controls><source src="/assets/samples/valle/warrenton_valle.wav" type="audio/x-wav"></audio></td>
+<td><audio controls><source src="/assets/samples/valle/warrenton_gt.wav" type="audio/x-wav"></audio></td>
+</tr></p>
+</table>
+</tr>
+
+    </main>
+    <footer role="contentinfo">
+</footer>
+
+  </body>
+</html>
