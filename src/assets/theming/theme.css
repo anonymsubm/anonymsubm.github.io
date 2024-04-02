@@ -3,32 +3,6 @@
   padding: 0;
 }
 
-nav {
-  ul {
-    list-style: none;
-  }
-}
-nav ul li {
-  display: inline-block;
-  font-size: 2rem;
-  
-  + li {
-    margin-left: 1.2rem;
-  }
-
-  &.active a {
-    font-weight: 600;
-    text-decoration: underline;
-  }
-
-  a {
-    display: inline-block;
-    text-decoration: none;
-    padding-bottom: 5px;
-    transition: color 400ms;
-  }
-}
-
 #main {
     margin-left: 10px;
     margin-right: 10px;
