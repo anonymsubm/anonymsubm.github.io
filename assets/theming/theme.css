@@ -1,6 +1,7 @@
 * {
   margin: 0;
   padding: 0;
+  font-family: "Verdana", "Courier New", monospace;
 }
 
 #main {
@@ -9,6 +10,31 @@
     margin-top: 40px;
     margin-bottom: 40px;
 }
+
+.abstract {
+  max-width: 600px;
+  text-align: center;
+}
+
+h1 {
+  font-size: 30pt;
+  text-align: center;
+}
+
+h2 {
+  margin-bottom: 20pt;
+}
+
+#wrap {
+  text-align: center;
+}
+
+#content {
+  display: inline-block;
+  text-align: left;
+  max-width: 600px;
+}
+
 body { 
     max-width: 1200px;
     line-height: 1.2;
@@ -24,12 +50,15 @@ p, li {
 p {
     margin-top: 0.5em;
     margin-bottom: 0.5em;
+    text-align: left;
 }
 
 audio {
   controls: "controls";
-  max-width: 130px;
+  max-width: 120px;
+  max-height: 20px;
 }
+
 table {
   border-collapse: collapse;
 }
@@ -39,3 +68,47 @@ tr {
 td {
   padding: 5px;
 }
+table.small_table {
+  margin-left: auto;
+  margin-right: auto;
+  border-collapse: collapse;
+}
+table.small_table tr {
+  border-bottom: none;
+}
+table.small_table td {
+  padding-top: 25px;
+  padding-bottom: 25px;
+  padding-right: 45px;
+  padding-left: 45px;
+}
+
+table.small_audio audio {
+  max-width: 50px;
+}
+p.transcript {
+  font-style: italic;
+  text-align: center;
+  color: grey;
+}
+
+table.very_small_table {
+  margin-left: auto;
+  margin-right: auto;
+  border-collapse: collapse;
+}
+table.very_small_table tr {
+  border-bottom-color: gainsboro;
+}
+table.very_small_table td {
+  padding-top: 25px;
+  padding-bottom: 25px;
+  padding-right: 30px;
+  padding-left: 30px;
+}
+
+table.very_small_audio audio {
+  max-width: 50px;
+}
+
+

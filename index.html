@@ -32,177 +32,347 @@
 
     <main role="main">
       <link rel="stylesheet" href="/assets/theming/theme.css" />
-<h1>Small-E Demo page</h1>
-<h2>Abstract:</h2>
-<p>Recent advancements in text-to-speech (TTS) powered by
-language models have showcased remarkable capabilities in
-achieving naturalness and zero-shot voice cloning. Notably,
-the decoder-only transformer is the prominent architecture in
-this domain. However, transformers face challenges stemming
-from their quadratic complexity in sequence length, imped-
-ing training on lengthy sequences and resource-constrained
-hardware. Moreover they lack specific inductive bias with
-regards to the monotonic nature of TTS alignments. In
-response, we propose to replace transformers with emerging
-recurrent architectures and introduce specialized cross-attention
-mechanisms for reducing repeating and skipping issues.
-Consequently our architecture can be efficiently trained on long
-samples and achieve state-of-the-art zero-shot voice cloning
-against baselines of comparable size</p>
-<table >
-    <tr >
-    <th> Model </th>
-    <th> Params. </th>
-    <th> Rel. size</th>
-    <th> Vocoder </th>
+<h1>Lina-Speech: Prefix-Free and Scalable Prompting for Text-to-Speeh Synthesis</h1>
+<br>
+<br>
+<br>
+<div id="wrap">
+    <div id="content">
+    <b> Abstract: </b>
+    Neural codec language models, built on transformer architecture, have revolutionized text-to-speech synthesis, excelling in voice cloning by treating it as a prefix continuation task. However, their limited context length limits its effectiveness to few samples of moderate length. As a result, adapting prosody, accent, or an adequate emotion from a short prefix remains challenging. Moreover, the quadratic complexity of self-attention limits inference throughput and long synthesis.
+    We introduce Lina-Speech, a new TTS model: motivated by empirical observations, it replaces self-attention with Gated Linear Attention as a principled backbone, improving inference throughput while matching state-of-the-art performance. In addition we address the problem of multi-sample conditioning through initial-state tuning, leveraging the stateful property of recurrent architecture to enable comprehensive voice cloning. We demonstrate the effectiveness of this approach for controlling fine-grained aspect of the voice such as emotion and prosody in a flexible way. We will release our code and checkpoints.
+    </div>
+</div>
+<br>
+<p><strong>Note:</strong> All prompted speakers and styles are unseen during training.</p>
+<p><br> <br> <br></p>
+<h2>Prefix-free</h2>
+<p>Unlike voice continuation, initial-state tuning does not consume the available context length, allowing synthesis up to the maximum limit without constraints imposed by the prompt length.</p>
+ <p class="transcript"> "Taking into account a range of potentially relevant factors, it seems important—though perhaps unnecessary—to acknowledge that while various perspectives can be entertained, the broader implications remain sufficiently open-ended to warrant a careful consideration that may or may not lead to greater clarity, depending largely on how one chooses to interpret <font color="#de382c"> the underlying complexities at play. </font>" </p>
+<br>
+<br>
+<br>
+<table class="small_table">
+    <tr>
+    <th>Prompt</th>
+    <th>Continuation</th>
+    <th>Initial-State Tuning</th>
     </tr>
     <tr>
-    <td> Small-E (ours) </td>
-    <td> 64M </td>
-    <td> 1x </td>
-    <td> Vocos 3kbps </td>
+        <td><audio controls=""><source src="/assets/samples/demo/long/long_prompt.wav" type="audio/x-wav"></audio></td>
+        <td><audio controls=""><source src="/assets/samples/demo/long/long_continuation.wav" type="audio/x-wav"></audio></td>
+        <td><audio controls=""><source src="/assets/samples/demo/long/long_ist.wav" type="audio/x-wav"></audio></td>
+    </tr>
+</table>
+<br>
+<br>
+<br>
+<h2>Scalable prompting</h2>
+<p>Initial-state tuning is particularly effective for cloning emotive speech and capturing finer prosodic details compared to speech continuation.</p>
+<h4>For prompting emotion</h4>
+<p class="transcript"> "Lina-Speech is a fast and parameter efficient text-to-speech model" </p>
+<br>
+<table class="small_table">
+    <tr>
+    <th>Emotion</th>
+    <th>Prompt</th>
+    <th>Continuation</th>
+    <th>Initial-State Tuning</th>
     </tr>
     <tr>
-    <td> YourTTS </td>
-    <td> 86M </td>
-    <td> 1.3x </td>
-    <td> End-to-End</td>
+        <td> Happy </td>
+        <td><audio controls=""><source src="/assets/samples/demo/emotion/happy_prompt.wav" type="audio/x-wav"></audio></td>
+        <td><audio controls=""><source src="/assets/samples/demo/emotion/happy_continuation.wav" type="audio/x-wav"></audio></td>
+        <td><audio controls=""><source src="/assets/samples/demo/emotion/happy_lina.wav" type="audio/x-wav"></audio></td>
     </tr>
     <tr>
-    <td> Metavoice</td>
-    <td> 1.2B </td>
-    <td> 18.75x </td>
-    <td> Multiband Diffusion + Postnet</td>
+        <td> Sad </td>
+        <td><audio controls=""><source src="/assets/samples/demo/emotion/sad_prompt.wav" type="audio/x-wav"></audio></td>
+        <td><audio controls=""><source src="/assets/samples/demo/emotion/sad_continuation.wav" type="audio/x-wav"></audio></td>
+        <td><audio controls=""><source src="/assets/samples/demo/emotion/sad_lina.wav" type="audio/x-wav"></audio></td>
+    </tr>
+    <tr>
+        <td> Confused </td>
+        <td><audio controls=""><source src="/assets/samples/demo/emotion/confused_prompt.wav" type="audio/x-wav"></audio></td>
+        <td><audio controls=""><source src="/assets/samples/demo/emotion/confused_continuation.wav" type="audio/x-wav"></audio></td>
+        <td><audio controls=""><source src="/assets/samples/demo/emotion/confused_lina.wav" type="audio/x-wav"></audio></td>
+    </tr>
+</table>
+<br>
+<br>
+<br>
+<h4>For prompting prosody</h4>
+<p class="transcript"> "Gated Linear Attention is a sound choice for audio generation." </p>
+<br>
+<table class="small_table">
+    <tr>
+    <th>Style</th>
+    <th>Prompt</th>
+    <th>Continuation</th>
+    <th>Initial-State Tuning</th>
+    </tr>
+    <tr>
+        <td> Enunciated </td>
+        <td><audio controls=""><source src="/assets/samples/demo/prosody/enunciated_original.wav" type="audio/x-wav"></audio></td>
+        <td><audio controls=""><source src="/assets/samples/demo/prosody/enunciated_continuation.wav" type="audio/x-wav"></audio></td>
+        <td><audio controls=""><source src="/assets/samples/demo/prosody/enunciated_lina.wav" type="audio/x-wav"></audio></td>
+    </tr>
+    <tr>
+        <td> Whisper </td>
+        <td><audio controls=""><source src="/assets/samples/demo/prosody/whisper_prompt.wav" type="audio/x-wav"></audio></td>
+        <td><audio controls=""><source src="/assets/samples/demo/prosody/whisper_continuation.wav" type="audio/x-wav"></audio></td>
+        <td><audio controls=""><source src="/assets/samples/demo/prosody/whisper_lina.wav" type="audio/x-wav"></audio></td>
     </tr>
 <p><tr>
-<td> VALL-E</td>
-<td> 2x150M </td>
-<td> 4.6x </td>
-<td> EnCodec 6kbps</td>
+<td> ASMR </td>
+<td><audio controls=""><source src="/assets/samples/demo/prosody/asmr_original.wav" type="audio/x-wav"></audio></td>
+<td><audio controls=""><source src="/assets/samples/demo/prosody/asmr_continuation.wav" type="audio/x-wav"></audio></td>
+<td><audio controls=""><source src="/assets/samples/demo/prosody/asmr_lina.wav" type="audio/x-wav"></audio></td>
+</tr></p>
+<p><tr>
+<td> Robotic</td>
+<td><audio controls=""><source src="/assets/samples/demo/prosody/glados_original.wav" type="audio/x-wav"></audio></td>
+<td><audio controls=""><source src="/assets/samples/demo/prosody/glados_continuation.wav" type="audio/x-wav"></audio></td>
+<td><audio controls=""><source src="/assets/samples/demo/prosody/glados_lina.wav" type="audio/x-wav"></audio></td>
 </tr></p>
 </table>
 <br>
 <br>
-<h3>Comparison with baselines</h3>
-<p>Prompt is the speaker reference given to each model.</p>
-<table>
+<br>
+<h4>Impact of the initial-state rank.</h4>
+<p>We hypothesize that a low-rank structure serves as a regularization for state tuning, particularly preserving the onset phase.</p>
+<p class="transcript"> "Lina-Speech is a fast and parameter efficient text-to-speech model" </p>
+<table class="small_table small_audio">
+    <tr>
+    <th>r=1</th>
+    <th>r=4</th>
+    <th>r=8</th>
+    <th>r=16</th>
+    <th>r=32</th>
+    <th>r=64</th>
+    </tr>
+    <tr>
+        <td> <audio controls=""><source src="/assets/samples/demo/ranks/1/r1.wav" type="audio/x-wav"></audio> </td>
+        <td> <audio controls=""><source src="/assets/samples/demo/ranks/1/r4.wav" type="audio/x-wav"></audio> </td>
+        <td> <audio controls=""><source src="/assets/samples/demo/ranks/1/r8.wav" type="audio/x-wav"></audio> </td>
+        <td> <audio controls=""><source src="/assets/samples/demo/ranks/1/r16.wav" type="audio/x-wav"></audio> </td>
+        <td> <audio controls=""><source src="/assets/samples/demo/ranks/1/r32.wav" type="audio/x-wav"></audio> </td>
+        <td> <audio controls=""><source src="/assets/samples/demo/ranks/1/r64.wav" type="audio/x-wav"></audio> </td>
+    </tr>
+    <tr>
+        <td> <audio controls=""><source src="/assets/samples/demo/ranks/2/r1.wav" type="audio/x-wav"></audio> </td>
+        <td> <audio controls=""><source src="/assets/samples/demo/ranks/2/r4.wav" type="audio/x-wav"></audio> </td>
+        <td> <audio controls=""><source src="/assets/samples/demo/ranks/2/r8.wav" type="audio/x-wav"></audio> </td>
+        <td> <audio controls=""><source src="/assets/samples/demo/ranks/2/r16.wav" type="audio/x-wav"></audio> </td>
+        <td> <audio controls=""><source src="/assets/samples/demo/ranks/2/r32.wav" type="audio/x-wav"></audio> </td>
+        <td> <audio controls=""><source src="/assets/samples/demo/ranks/2/r64.wav" type="audio/x-wav"></audio> </td>
+    </tr>
+    <tr>
+        <td> <audio controls=""><source src="/assets/samples/demo/ranks/3/r1.wav" type="audio/x-wav"></audio> </td>
+        <td> <audio controls=""><source src="/assets/samples/demo/ranks/3/r4.wav" type="audio/x-wav"></audio> </td>
+        <td> <audio controls=""><source src="/assets/samples/demo/ranks/3/r8.wav" type="audio/x-wav"></audio> </td>
+        <td> <audio controls=""><source src="/assets/samples/demo/ranks/3/r16.wav" type="audio/x-wav"></audio> </td>
+        <td> <audio controls=""><source src="/assets/samples/demo/ranks/3/r32.wav" type="audio/x-wav"></audio></td>
+        <td> <audio controls=""><source src="/assets/samples/demo/ranks/3/r64.wav" type="audio/x-wav"></audio> </td>
+    </tr>
+</table>
+<br>
+<br>
+<br>
+<h4>Additional samples</h4>
+<br>
+<br>
+<br>
+<table class="small_table">
+    <tr>
+    <th>Speaker</th>
+    <th>Prompt</th>
+    <th>Continuation</th>
+    <th>Initial-State Tuning</th>
+    </tr>
+     <p class="transcript">The train sped through the countryside, fields of green and gold rushing past the window in a blur. Inside the carriage, passengers settled into their seats, lost in thought or conversation. A child pressed her nose against the glass, marveling at the changing landscape, while her parents whispered quietly, planning their next adventure together.</p> 
+    <tr>
+        <td> 3blue1brown </td>
+        <td> <audio controls=""><source src="/assets/samples/demo/misc2/3b1b_original.wav" type="audio/x-wav"></audio> </td>
+        <td> <audio controls=""><source src="/assets/samples/demo/misc2/3b1b_continuation.wav" type="audio/x-wav"></audio> </td>
+        <td> <audio controls=""><source src="/assets/samples/demo/misc2/3b1b_ist.wav" type="audio/x-wav"></audio> </td>
+    </tr>
+</table>
+<br>
+<table class="small_table">
+    <tr>
+    <th>Speaker</th>
+    <th>Prompt</th>
+    <th>Continuation</th>
+    <th>Initial-State Tuning</th>
+    </tr>
+<p><p class="transcript">&quot;You can't be serious&quot;, he scoffed, crossing his arms. &quot;There's no way a cat could have stolen your sandwich!&quot;</p>
+<tr>
+<td> Sabine Hossenfelder </td>
+<td> <audio controls=""><source src="/assets/samples/demo/misc2/sabine_original.wav" type="audio/x-wav"></audio> </td>
+<td> <audio controls=""><source src="/assets/samples/demo/misc2/sabine_continuation.wav" type="audio/x-wav"></audio> </td>
+<td> <audio controls=""><source src="/assets/samples/demo/misc2/sabine_ist.wav" type="audio/x-wav"></audio> </td>
+</tr></p>
+</table>
+<br>
+<table class="small_table">
+    <tr>
+    <th>Speaker</th>
+    <th>Prompt</th>
+    <th>Continuation</th>
+    <th>Initial-State Tuning</th>
+    </tr>
+<p><p class="transcript"> Discovery is a child's privilege. I mean the small child, the child who is not afraid to be wrong, to look silly, to not be serious, and to act differently from everyone else. He is also not afraid that the things he is interested in are in bad taste or turn out to be different from his expectations, from what they should be, or rather he is not afraid of what they actually are.</p>
+<tr>
+<td> Frank Zappa </td>
+<td> <audio controls=""><source src="/assets/samples/demo/misc2/zappa_original.wav" type="audio/x-wav"></audio> </td>
+<td> <audio controls=""><source src="/assets/samples/demo/misc2/zappa_continuation.wav" type="audio/x-wav"></audio> </td>
+<td> <audio controls=""><source src="/assets/samples/demo/misc2/zappa_ist.wav" type="audio/x-wav"></audio> </td>
+</tr></p>
+</table>
+<br>
+<br>
+<br>
+<h2>Evaluation samples</h2>
+<h4>LibriTTS</h4>
+<table class="very_small_table small_audio">
     <tr>
     <th>Text</th>
     <th>Prompt</th>
-    <th>Small-E (ours)</th>
-    <th>YourTTS</th>
-    <th>Metavoice</th>
-    <th>Ground Truth</th>
-    </tr>
-<p><tr style="border-bottom: 1px solid #000;">
-<td>  The space between his two front teeth, which were unusually far apart, gave him the proficiency in whistling for which he was distinguished at college.</td>
-<td><audio controls=""><source src="/assets/samples/selected_pair/prompt/11_prompt.wav" type="audio/x-wav"></audio></td>
-<td><audio controls=""><source src="/assets/samples/selected_pair/smalle/11_synth.wav" type="audio/x-wav"></audio></td>
-<td><audio controls><source src="/assets/samples/selected_pair/yourtts/11_synth.wav" type="audio/x-wav"></audio></td>
-<td><audio controls><source src="/assets/samples/selected_pair/metavoice/11_synth.wav" type="audio/x-wav"></audio></td>
-<td><audio controls><source src="/assets/samples/selected_pair/target/11_target.wav" type="audio/x-wav"></audio></td>
+    <th>Target</th>
+    <th>Continuation (ours)</th>
+    <th>IS Tuning<br>(ours)</th>
+    <th>CosyVoice2</th>
+    <th>StyleTTS2</th>
+    <th>XTTS2</th>
+    <th>VoiceCraft</th>
+<p></tr></p>
+<p><tr>
+<td> Also, a popular contrivance whereby love making may be suspended but not stopped during the picnic season.</td>
+<td> <audio controls=""><source src="/assets/samples/demo/ltts_test/prompt/39.wav" type="audio/x-wav"></audio> </td>
+<td> <audio controls=""><source src="/assets/samples/demo/ltts_test/target/39.wav" type="audio/x-wav"></audio> </td>
+<td> <audio controls=""><source src="/assets/samples/demo/ltts_test/lina_pc/39.wav" type="audio/x-wav"></audio> </td>
+<td> <audio controls=""><source src="/assets/samples/demo/ltts_test/lina_ist/39.wav" type="audio/x-wav"></audio> </td>
+<td> <audio controls=""><source src="/assets/samples/demo/ltts_test/cosyvoice/39.wav" type="audio/x-wav"></audio> </td>
+<td> <audio controls=""><source src="/assets/samples/demo/ltts_test/styletts/39.wav" type="audio/x-wav"></audio> </td>
+<td> <audio controls=""><source src="/assets/samples/demo/ltts_test/xtts/39.wav" type="audio/x-wav"></audio> </td>
+<td> <audio controls=""><source src="/assets/samples/demo/ltts_test/voicecraft/39.wav" type="audio/x-wav"></audio> </td>
 </tr></p>
-<p><tr style="border-bottom: 1px solid #000;">
-<td>  Having travelled around the world, I had cultivated an indifference to any special difficulties of that kind.</td>
-<td><audio controls=""><source src="/assets/samples/selected_pair/prompt/12_prompt.wav" type="audio/x-wav"></audio></td>
-<td><audio controls=""><source src="/assets/samples/selected_pair/smalle/12_synth.wav" type="audio/x-wav"></audio></td>
-<td><audio controls><source src="/assets/samples/selected_pair/yourtts/12_synth.wav" type="audio/x-wav"></audio></td>
-<td><audio controls><source src="/assets/samples/selected_pair/metavoice/12_synth.wav" type="audio/x-wav"></audio></td>
-<td><audio controls><source src="/assets/samples/selected_pair/target/12_target.wav" type="audio/x-wav"></audio></td>
+<p><tr>
+<td> But there'll be pushers as long as weak men turn to drugs, and graft as long as voters allow the thing to get out of their hands. </td>
+<td> <audio controls=""><source src="/assets/samples/demo/ltts_test/prompt/43.wav" type="audio/x-wav"></audio> </td>
+<td> <audio controls=""><source src="/assets/samples/demo/ltts_test/target/43.wav" type="audio/x-wav"></audio> </td>
+<td> <audio controls=""><source src="/assets/samples/demo/ltts_test/lina_pc/43.wav" type="audio/x-wav"></audio> </td>
+<td> <audio controls=""><source src="/assets/samples/demo/ltts_test/lina_ist/43.wav" type="audio/x-wav"></audio> </td>
+<td> <audio controls=""><source src="/assets/samples/demo/ltts_test/cosyvoice/43.wav" type="audio/x-wav"></audio> </td>
+<td> <audio controls=""><source src="/assets/samples/demo/ltts_test/styletts/43.wav" type="audio/x-wav"></audio> </td>
+<td> <audio controls=""><source src="/assets/samples/demo/ltts_test/xtts/43.wav" type="audio/x-wav"></audio> </td>
+<td> <audio controls=""><source src="/assets/samples/demo/ltts_test/voicecraft/43.wav" type="audio/x-wav"></audio> </td>
 </tr></p>
-<p><tr style="border-bottom: 1px solid #000;">
-<td>  But there are other standards of repute and other, more or less imperative, canons of conduct, besides wealth and its manifestation, and some of these come in to accentuate or to qualify the broad, fundamental canon of conspicuous waste.</td>
-<td><audio controls=""><source src="/assets/samples/selected_pair/prompt/13_prompt.wav" type="audio/x-wav"></audio></td>
-<td><audio controls=""><source src="/assets/samples/selected_pair/smalle/13_synth.wav" type="audio/x-wav"></audio></td>
-<td><audio controls><source src="/assets/samples/selected_pair/yourtts/13_synth.wav" type="audio/x-wav"></audio></td>
-<td><audio controls><source src="/assets/samples/selected_pair/metavoice/13_synth.wav" type="audio/x-wav"></audio></td>
-<td><audio controls><source src="/assets/samples/selected_pair/target/13_target.wav" type="audio/x-wav"></audio></td>
+<p><tr>
+<td>Thou wottest none can stir from his place, except the watchman seize him.</td>
+<td> <audio controls=""><source src="/assets/samples/demo/ltts_test/prompt/71.wav" type="audio/x-wav"></audio> </td>
+<td> <audio controls=""><source src="/assets/samples/demo/ltts_test/target/71.wav" type="audio/x-wav"></audio> </td>
+<td> <audio controls=""><source src="/assets/samples/demo/ltts_test/lina_pc/71.wav" type="audio/x-wav"></audio> </td>
+<td> <audio controls=""><source src="/assets/samples/demo/ltts_test/lina_ist/71.wav" type="audio/x-wav"></audio> </td>
+<td> <audio controls=""><source src="/assets/samples/demo/ltts_test/cosyvoice/71.wav" type="audio/x-wav"></audio> </td>
+<td> <audio controls=""><source src="/assets/samples/demo/ltts_test/styletts/71.wav" type="audio/x-wav"></audio> </td>
+<td> <audio controls=""><source src="/assets/samples/demo/ltts_test/xtts/71.wav" type="audio/x-wav"></audio> </td>
+<td> <audio controls=""><source src="/assets/samples/demo/ltts_test/voicecraft/71.wav" type="audio/x-wav"></audio> </td>
 </tr></p>
-<p><tr style="border-bottom: 1px solid #000;">
-<td>  I suppose Professor Liedenbrock was of my opinion too, and even shared my fears, for after having examined the pick, his eyes traversed the ocean from side to side.</td>
-<td><audio controls=""><source src="/assets/samples/selected_pair/prompt/17_prompt.wav" type="audio/x-wav"></audio></td>
-<td><audio controls=""><source src="/assets/samples/selected_pair/smalle/17_synth.wav" type="audio/x-wav"></audio></td>
-<td><audio controls><source src="/assets/samples/selected_pair/yourtts/17_synth.wav" type="audio/x-wav"></audio></td>
-<td><audio controls><source src="/assets/samples/selected_pair/metavoice/17_synth.wav" type="audio/x-wav"></audio></td>
-<td><audio controls><source src="/assets/samples/selected_pair/target/17_target.wav" type="audio/x-wav"></audio></td>
+<p><tr>
+<td>I don't think, mr Hale, you have done quite right in introducing such a person to us without telling us what he had been.</td>
+<td> <audio controls=""><source src="/assets/samples/demo/ltts_test/prompt/90.wav" type="audio/x-wav"></audio> </td>
+<td> <audio controls=""><source src="/assets/samples/demo/ltts_test/target/90.wav" type="audio/x-wav"></audio> </td>
+<td> <audio controls=""><source src="/assets/samples/demo/ltts_test/lina_pc/90.wav" type="audio/x-wav"></audio> </td>
+<td> <audio controls=""><source src="/assets/samples/demo/ltts_test/lina_ist/90.wav" type="audio/x-wav"></audio> </td>
+<td> <audio controls=""><source src="/assets/samples/demo/ltts_test/cosyvoice/90.wav" type="audio/x-wav"></audio> </td>
+<td> <audio controls=""><source src="/assets/samples/demo/ltts_test/styletts/90.wav" type="audio/x-wav"></audio> </td>
+<td> <audio controls=""><source src="/assets/samples/demo/ltts_test/xtts/90.wav" type="audio/x-wav"></audio> </td>
+<td> <audio controls=""><source src="/assets/samples/demo/ltts_test/voicecraft/90.wav" type="audio/x-wav"></audio> </td>
 </tr></p>
-<p><tr style="border-bottom: 1px solid #000;">
-<td>  Rodolfo was now impatient to get rid of Leocadia, and made up his mind to lay her in the street, insensible as she was.</td>
-<td><audio controls=""><source src="/assets/samples/selected_pair/prompt/20_prompt.wav" type="audio/x-wav"></audio></td>
-<td><audio controls=""><source src="/assets/samples/selected_pair/smalle/20_synth.wav" type="audio/x-wav"></audio></td>
-<td><audio controls><source src="/assets/samples/selected_pair/yourtts/20_synth.wav" type="audio/x-wav"></audio></td>
-<td><audio controls><source src="/assets/samples/selected_pair/metavoice/20_synth.wav" type="audio/x-wav"></audio></td>
-<td><audio controls><source src="/assets/samples/selected_pair/target/20_target.wav" type="audio/x-wav"></audio></td>
-</tr></p>
-<p><tr style="border-bottom: 1px solid #000;">
-<td>  The infamy of this bargain had such an influence on the Scottish parliament, that they once voted that the king should be protected, and his liberty insisted on.</td>
-<td><audio controls=""><source src="/assets/samples/selected_pair/prompt/3_prompt.wav" type="audio/x-wav"></audio></td>
-<td><audio controls=""><source src="/assets/samples/selected_pair/smalle/3_synth.wav" type="audio/x-wav"></audio></td>
-<td><audio controls><source src="/assets/samples/selected_pair/yourtts/3_synth.wav" type="audio/x-wav"></audio></td>
-<td><audio controls><source src="/assets/samples/selected_pair/metavoice/3_synth.wav" type="audio/x-wav"></audio></td>
-<td><audio controls><source src="/assets/samples/selected_pair/target/3_target.wav" type="audio/x-wav"></audio></td>
-</tr></p>
-<p><tr style="border-bottom: 1px solid #000;">
-<td>  The water soon flowed into its bed again, but watching the ground on either side, the foresters pursued their way content with knowing that the trail lay beneath.</td>
-<td><audio controls=""><source src="/assets/samples/selected_pair/prompt/8_prompt.wav" type="audio/x-wav"></audio></td>
-<td><audio controls=""><source src="/assets/samples/selected_pair/smalle/8_synth.wav" type="audio/x-wav"></audio></td>
-<td><audio controls><source src="/assets/samples/selected_pair/yourtts/8_synth.wav" type="audio/x-wav"></audio></td>
-<td><audio controls><source src="/assets/samples/selected_pair/metavoice/8_synth.wav" type="audio/x-wav"></audio></td>
-<td><audio controls><source src="/assets/samples/selected_pair/target/8_target.wav" type="audio/x-wav"></audio></td>
-</tr></p>
-<p><tr style="border-bottom: 1px solid #000;">
-<td>  Hugh MacConnell came with his sister, and stood about, managing his tea cup awkwardly and watching every one out of his deep set, faded eyes.</td>
-<td><audio controls=""><source src="/assets/samples/selected_pair/prompt/93_prompt.wav" type="audio/x-wav"></audio></td>
-<td><audio controls=""><source src="/assets/samples/selected_pair/smalle/93_synth.wav" type="audio/x-wav"></audio></td>
-<td><audio controls><source src="/assets/samples/selected_pair/yourtts/93_synth.wav" type="audio/x-wav"></audio></td>
-<td><audio controls><source src="/assets/samples/selected_pair/metavoice/93_synth.wav" type="audio/x-wav"></audio></td>
-<td><audio controls><source src="/assets/samples/selected_pair/target/93_target.wav" type="audio/x-wav"></audio></td>
+<p><tr>
+<td>Nature produces without purpose, sustains without intention and destroys without thought.</td>
+<td> <audio controls=""><source src="/assets/samples/demo/ltts_test/prompt/98.wav" type="audio/x-wav"></audio> </td>
+<td> <audio controls=""><source src="/assets/samples/demo/ltts_test/target/98.wav" type="audio/x-wav"></audio> </td>
+<td> <audio controls=""><source src="/assets/samples/demo/ltts_test/lina_pc/98.wav" type="audio/x-wav"></audio> </td>
+<td> <audio controls=""><source src="/assets/samples/demo/ltts_test/lina_ist/98.wav" type="audio/x-wav"></audio> </td>
+<td> <audio controls=""><source src="/assets/samples/demo/ltts_test/cosyvoice/98.wav" type="audio/x-wav"></audio> </td>
+<td> <audio controls=""><source src="/assets/samples/demo/ltts_test/styletts/98.wav" type="audio/x-wav"></audio> </td>
+<td> <audio controls=""><source src="/assets/samples/demo/ltts_test/xtts/98.wav" type="audio/x-wav"></audio> </td>
+<td> <audio controls=""><source src="/assets/samples/demo/ltts_test/voicecraft/98.wav" type="audio/x-wav"></audio> </td>
 </tr></p>
 </table>
-</tr>
-<table>
+<br>
+<br>
+<br>
+<h4>Expresso</h4>
+<p>Note : We use a fine-tuned checkpoint of Parler-TTS on Expresso provided on the official repository.</p>
+<table class="very_small_table small_audio">
     <tr>
     <th>Text</th>
     <th>Prompt</th>
-    <th>Small-E (ours)</th>
-    <th>VALL-E</th>
-    <th>Ground Truth</th>
-    </tr>
-<br>
-<br>
-<br>
-<h3>Comparison with VALL-E</h3>
-<p>We add samples from the demo page of VALL-E since there is no official implementation.</p>
-<p><tr style="border-bottom: 1px solid #000;">
-<td>  And lay me down in thy cold bed and leave my shining lot. </td>
-<td><audio controls=""><source src="/assets/samples/valle/and_lay_me_down_prompt.wav" type="audio/x-wav"></audio></td>
-<td><audio controls=""><source src="/assets/samples/valle/and_lay_me_down.wav" type="audio/x-wav"></audio></td>
-<td><audio controls><source src="/assets/samples/valle/and_lay_me_down_valle.wav" type="audio/x-wav"></audio></td>
-<td><audio controls><source src="/assets/samples/valle/and_lay_me_down_gt.wav" type="audio/x-wav"></audio></td>
+    <th>Continuation (ours)</th>
+    <th>IS Tuning (ours)</th>
+    <th>CosyVoice2</th>
+    <th>Parler TTS</th>
+    <th>XTTS2</th>
+    <th>VoiceCraft</th>
+<p></tr></p>
+<p><tr>
+<td>With a flick of her wrist, the magician made the coin vanish into thin air.</td>
+<td> <audio controls=""><source src="/assets/samples/demo/expresso_test/prompt/5.wav" type="audio/x-wav"></audio> </td>
+<td> <audio controls=""><source src="/assets/samples/demo/expresso_test/lina_pc/5.wav" type="audio/x-wav"></audio> </td>
+<td> <audio controls=""><source src="/assets/samples/demo/expresso_test/lina_ist/5.wav" type="audio/x-wav"></audio> </td>
+<td> <audio controls=""><source src="/assets/samples/demo/expresso_test/cosyvoice/5.wav" type="audio/x-wav"></audio> </td>
+<td> <audio controls=""><source src="/assets/samples/demo/expresso_test/styletts/5.wav" type="audio/x-wav"></audio> </td>
+<td> <audio controls=""><source src="/assets/samples/demo/expresso_test/xtts/5.wav" type="audio/x-wav"></audio> </td>
+<td> <audio controls=""><source src="/assets/samples/demo/expresso_test/voicecraft/5.wav" type="audio/x-wav"></audio> </td>
 </tr></p>
-<p><tr style="border-bottom: 1px solid #000;">
-<td>  Number ten, fresh nelly is waiting on you, good night husband. </td>
-<td><audio controls=""><source src="/assets/samples/valle/number_ten_prompt.wav" type="audio/x-wav"></audio></td>
-<td><audio controls=""><source src="/assets/samples/valle/number_ten.wav" type="audio/x-wav"></audio></td>
-<td><audio controls><source src="/assets/samples/valle/number_ten_valle.wav" type="audio/x-wav"></audio></td>
-<td><audio controls><source src="/assets/samples/valle/number_ten_gt.wav" type="audio/x-wav"></audio></td>
+<p><tr>
+<td>Her laugh, bright and infectious, echoed through the halls, lifting the spirits of everyone around.</td>
+<td> <audio controls=""><source src="/assets/samples/demo/expresso_test/prompt/2.wav" type="audio/x-wav"></audio> </td>
+<td> <audio controls=""><source src="/assets/samples/demo/expresso_test/lina_pc/2.wav" type="audio/x-wav"></audio> </td>
+<td> <audio controls=""><source src="/assets/samples/demo/expresso_test/lina_ist/2.wav" type="audio/x-wav"></audio> </td>
+<td> <audio controls=""><source src="/assets/samples/demo/expresso_test/cosyvoice/2.wav" type="audio/x-wav"></audio> </td>
+<td> <audio controls=""><source src="/assets/samples/demo/expresso_test/styletts/2.wav" type="audio/x-wav"></audio> </td>
+<td> <audio controls=""><source src="/assets/samples/demo/expresso_test/xtts/2.wav" type="audio/x-wav"></audio> </td>
+<td> <audio controls=""><source src="/assets/samples/demo/expresso_test/voicecraft/2.wav" type="audio/x-wav"></audio> </td>
 </tr></p>
-<p><tr style="border-bottom: 1px solid #000;">
-<td>  Yea, his honourable worship is within, but he hath a godly minister or two with him, and likewise a leech. </td>
-<td><audio controls=""><source src="/assets/samples/valle/honourable_prompt.wav" type="audio/x-wav"></audio></td>
-<td><audio controls=""><source src="/assets/samples/valle/honourable.wav" type="audio/x-wav"></audio></td>
-<td><audio controls><source src="/assets/samples/valle/honourable_valle.wav" type="audio/x-wav"></audio></td>
-<td><audio controls><source src="/assets/samples/valle/honourable_gt.wav" type="audio/x-wav"></audio></td>
+<p><tr>
+<td>At night, the city transformed into a glittering spectacle, with neon lights illuminating the streets, cars zipping by, and the hum of activity never seeming to cease, even in the darkest hours.</td>
+<td> <audio controls=""><source src="/assets/samples/demo/expresso_test/prompt/15.wav" type="audio/x-wav"></audio> </td>
+<td> <audio controls=""><source src="/assets/samples/demo/expresso_test/lina_pc/15.wav" type="audio/x-wav"></audio> </td>
+<td> <audio controls=""><source src="/assets/samples/demo/expresso_test/lina_ist/15.wav" type="audio/x-wav"></audio> </td>
+<td> <audio controls=""><source src="/assets/samples/demo/expresso_test/cosyvoice/15.wav" type="audio/x-wav"></audio> </td>
+<td> <audio controls=""><source src="/assets/samples/demo/expresso_test/styletts/15.wav" type="audio/x-wav"></audio> </td>
+<td> <audio controls=""><source src="/assets/samples/demo/expresso_test/xtts/15.wav" type="audio/x-wav"></audio> </td>
+<td> <audio controls=""><source src="/assets/samples/demo/expresso_test/voicecraft/15.wav" type="audio/x-wav"></audio> </td>
 </tr></p>
-<p><tr style="border-bottom: 1px solid #000;">
-<td>  They moved thereafter cautiously about the hut groping before and about them to find something to show that Warrenton had fulfilled his mission. </td>
-<td><audio controls=""><source src="/assets/samples/valle/warrenton_prompt.wav" type="audio/x-wav"></audio></td>
-<td><audio controls=""><source src="/assets/samples/valle/warrenton.wav" type="audio/x-wav"></audio></td>
-<td><audio controls><source src="/assets/samples/valle/warrenton_valle.wav" type="audio/x-wav"></audio></td>
-<td><audio controls><source src="/assets/samples/valle/warrenton_gt.wav" type="audio/x-wav"></audio></td>
+<p><tr>
+<td>The old man sat on his porch, whittling a piece of wood as the sun set.</td>
+<td> <audio controls=""><source src="/assets/samples/demo/expresso_test/prompt/35.wav" type="audio/x-wav"></audio> </td>
+<td> <audio controls=""><source src="/assets/samples/demo/expresso_test/lina_pc/35.wav" type="audio/x-wav"></audio> </td>
+<td> <audio controls=""><source src="/assets/samples/demo/expresso_test/lina_ist/35.wav" type="audio/x-wav"></audio> </td>
+<td> <audio controls=""><source src="/assets/samples/demo/expresso_test/cosyvoice/35.wav" type="audio/x-wav"></audio> </td>
+<td> <audio controls=""><source src="/assets/samples/demo/expresso_test/styletts/35.wav" type="audio/x-wav"></audio> </td>
+<td> <audio controls=""><source src="/assets/samples/demo/expresso_test/xtts/35.wav" type="audio/x-wav"></audio> </td>
+<td> <audio controls=""><source src="/assets/samples/demo/expresso_test/voicecraft/35.wav" type="audio/x-wav"></audio> </td>
+</tr></p>
+<p><tr>
+<td>Above the treetops, a flock of birds soared, their wings cutting through the cool morning air.</td>
+<td> <audio controls=""><source src="/assets/samples/demo/expresso_test/prompt/36.wav" type="audio/x-wav"></audio> </td>
+<td> <audio controls=""><source src="/assets/samples/demo/expresso_test/lina_pc/36.wav" type="audio/x-wav"></audio> </td>
+<td> <audio controls=""><source src="/assets/samples/demo/expresso_test/lina_ist/36.wav" type="audio/x-wav"></audio> </td>
+<td> <audio controls=""><source src="/assets/samples/demo/expresso_test/cosyvoice/36.wav" type="audio/x-wav"></audio> </td>
+<td> <audio controls=""><source src="/assets/samples/demo/expresso_test/styletts/36.wav" type="audio/x-wav"></audio> </td>
+<td> <audio controls=""><source src="/assets/samples/demo/expresso_test/xtts/36.wav" type="audio/x-wav"></audio> </td>
+<td> <audio controls=""><source src="/assets/samples/demo/expresso_test/voicecraft/36.wav" type="audio/x-wav"></audio> </td>
 </tr></p>
 </table>
-</tr>
+<br>
+<br>
+<br>
 
     </main>
     <footer role="contentinfo">
