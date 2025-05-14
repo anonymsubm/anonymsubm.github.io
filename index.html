@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Lina-Style Demo</title>
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Vue 3 via CDN -->
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+  <style>
+    /* Emotion tag colors */
+    .tag-default    { color: #374151; }
+    .tag-happy      { color: #F59E0B; }
+    .tag-sad        { color: #3B82F6; }
+    .tag-confused   { color: #A855F7; }
+    .tag-enunciated { color: #10B981; }
+    .tag-whisper    { color: #9CA3AF; }
+    /* Active menu link */
+    .menu-active    { font-weight: 600; }
+    .circle {@apply w-6 h-6 rounded-full;}
+
+  </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+  <div id="app" class="flex">
+
+    <!-- Sidebar Menu -->
+    <aside class="hidden md:block fixed top-0 left-0 w-64 h-screen bg-white border-r">
+      <div class="p-6">
+        <h1 class="text-2xl font-bold mb-4">Demo Sections</h1>
+        <nav>
+          <ul class="space-y-2">
+            <li v-for="section in sections" :key="section.id">
+              <a
+                :href="`#${section.id}`"
+                :class="[
+                  'text-gray-700 hover:text-gray-900',
+                  currentSection === section.id ? 'menu-active' : ''
+                ]"
+              >{{ section.label }}</a>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 overflow-auto p-6 space-y-12 md:ml-64">
+      <div class="max-w-3xl mx-auto space-y-12">
+        <!-- Page Intro -->
+        <section class="mb-8">
+          <h1 class="text-3xl font-bold mb-2">Lina-Style</h1>
+          <p class="text-gray-600">
+             Companion webpage of <strong>Lina-Style: Word-Level Style Control in TTS via Interleaved Data Distillation.</strong>
+          </p>
+        </section>
+
+        <!-- Abstract -->
+        <section class="bg-white p-6 rounded-lg shadow-lg">
+          <h2 class="text-2xl font-semibold mb-4">Abstract</h2>
+          <p class="text-gray-700">
+            We propose a method for word-level style conditioning in text-to-speech (TTS) based on data distillation, enabling emotion and style control with limited supervision. We first train a TTS model on stylistically unlabeled data. Then, using that base model, we synthesize multiple stylistic renditions of the same sentences by cloning expressive samples from a small labeled corpus. Using cross-attention alignments, we interleave segments from different styles to construct synthetic examples with local style variation. To provide independent control of style intensity, we generate samples with classifier-free guidance at varying strengths and condition the model accordingly. This self-distilled parallel dataset allows the model to learn precise and coherent word-level style control. Despite relying solely on synthetic supervision, our approach performs similarly to fine-tuned baselines while offering greater controllability.
+          </p>
+        </section>
+        <!-- Intensity Control -->
+        <section :id="sections[0].id" class="space-y-6">
+          <h2 class="text-2xl font-semibold">{{ sections[0].label }}</h2>
+          <div class="bg-white border-l-4 border-indigo-500 p-4 mb-4">
+            <p class="text-gray-600">
+                 Varying the intensity level for each style tag is achieved using a 5-point scale, where each level is associated with a learned embedding. These correspond to bins of linearly spaced CFG factors ranging from 0.5 (least intense) to 2.0 (most intense). This approach enables independent and simplified conditioning, avoiding the need for double generation as required when directly applying CFG.
+            </p>
+          </div>
+          <div
+            v-for="tag in intensityTags"
+            :key="tag"
+            class="bg-white p-4 rounded-lg shadow"
+          >
+            <h3 class="text-lg font-medium flex items-center space-x-2">
+              <span :class="['w-4','h-4','rounded-full', bgColorClass(tag)]"></span>
+              <span :class="['tag-'+tag]">{{ tag }}</span>
+            </h3>
+
+            <!-- Single-column audio players with 1–5 circle scale -->
+            <div class="mt-4 space-y-3">
+              <div v-for="n in [0,1,2,3,4]" :key="n" class="flex items-center space-x-4">
+                <audio
+                  :src="`intensity/ex01/${tag}/${n}.wav`"
+                  controls
+                  class="flex-1"
+                ></audio>
+                <div class="flex space-x-1">
+                  <span
+                    v-for="i in [0,1,2,3,4]" :key="i"
+                    class="w-2 h-2 rounded-full"
+                    :class="i <= n ? bgColorClass(tag) : 'bg-gray-300'"
+                  ></span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Exact tagged sentence -->
+            <p class="mt-4 text-lg">
+              <span v-for="(seg,i) in parseSentence(intensitySentences[tag])" :key="i">
+                <span :class="['font-medium','tag-'+seg.tag]">{{ seg.text }}</span>
+              </span>
+            </p>
+          </div>
+        </section>
+
+        <!-- Mismatched Samples -->
+        <section :id="sections[1].id" class="space-y-6">
+          <h2 class="text-2xl font-semibold">{{ sections[1].label }}</h2>
+          <div class="bg-white border-l-4 border-indigo-500 p-4 mb-4">
+            <p class="text-gray-600">
+              The style conditioning is disentangled from semantic content contained in the text prompt.
+            </p>
+          </div>
+          <div
+            v-for="item in mismatchedItems"
+            :key="item.src"
+            class="bg-white p-4 rounded-lg shadow"
+          >
+            <audio :src="item.src" controls class="w-full mb-4"></audio>
+            <!-- Legend & Intensity -->
+            <div class="mb-4">
+              <h3 class="text-lg font-medium">Style & Intensity</h3>
+              <div class="flex flex-wrap gap-4 mt-2">
+                <div
+                  v-for="tag in uniqueTags(item.sentence)"
+                  :key="tag"
+                  class="flex items-center space-x-2 w-full md:w-auto"
+                >
+                  <span :class="['w-4','h-4','rounded-full', bgColorClass(tag)]"></span>
+                  <span :class="['tag-'+tag,'font-medium']">{{ tag }}</span>
+                  <div v-if="tag!=='default'" class="ml-auto flex space-x-1">
+                    <span
+                      v-for="n in 5" :key="n" class="w-2 h-2 rounded-full"
+                      :class="n <= (((item.intensity||{})[tag]) ?? 3)
+                        ? bgColorClass(tag)
+                        : 'bg-gray-300'"
+                    ></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- Parsed Sentence -->
+            <p class="text-lg">
+              <span v-for="(seg,i) in parseSentence(item.sentence)" :key="i">
+                <span :class="['font-medium','tag-'+seg.tag]">{{ seg.text }}</span>
+              </span>
+            </p>
+          </div>
+        </section>
+
+
+
+        <!-- Miscellaneous Samples -->
+        <section :id="sections[2].id" class="space-y-6">
+          <h2 class="text-2xl font-semibold">{{ sections[2].label }}</h2>
+          <div class="bg-white border-l-4 border-indigo-500 p-4 mb-4">
+            <p class="text-gray-600">
+              Various examples with mixed styles and intensities.
+            </p>
+          </div>
+          <div
+            v-for="item in miscItems"
+            :key="item.src"
+            class="bg-white p-4 rounded-lg shadow"
+          >
+            <audio :src="item.src" controls class="w-full mb-4"></audio>
+            <!-- Legend & Intensity -->
+            <div class="mb-4">
+              <h3 class="text-lg font-medium">Style & Intensity</h3>
+              <div class="flex flex-wrap gap-4 mt-2">
+                <div
+                  v-for="tag in uniqueTags(item.sentence)"
+                  :key="tag"
+                  class="flex items-center space-x-2 w-full md:w-auto"
+                >
+                  <span :class="['w-4','h-4','rounded-full', bgColorClass(tag)]"></span>
+                  <span :class="['tag-' + tag, 'font-medium']">{{ tag }}</span>
+                  <div v-if="tag!=='default'" class="ml-auto flex space-x-1">
+                    <span
+                      v-for="n in 5" :key="n" class="w-2 h-2 rounded-full"
+                      :class="n <= (((item.intensity||{})[tag]) ?? 3)
+                        ? bgColorClass(tag)
+                        : 'bg-gray-300'"
+                    ></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- Parsed Sentence -->
+            <p class="text-lg">
+              <span v-for="(seg,i) in parseSentence(item.sentence)" :key="i">
+                <span :class="['font-medium','tag-'+seg.tag]">{{ seg.text }}</span>
+              </span>
+            </p>
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const { createApp } = Vue;
+    createApp({
+      data() {
+        return {
+          sections: [
+            { id:'intensity',  label:'Intensity control' },
+            { id:'mismatched', label:'Disentangled control from semantic content' },
+            { id:'misc',       label:'Miscellaneous samples' }
+          ],
+          items: [
+            {
+              src: 'misc/ex02/i_opened_the_box.wav',
+              intensity: { happy: 3, enunciated: 3 },
+              sentence:
+                '<default>I opened the box,</default> <happy>and there it was—the letter I\'d been waiting for,</happy> <enunciated>signed with my name in gold ink.</enunciated>'
+            },
+            {
+              src: 'misc/ex02/it_started.wav',
+              sentence:
+                '<default>It started as just another ordinary day,</default> <happy>until I received the unexpected invitation,</happy> <confused>which left me wondering what it meant.</confused>'
+            },
+            {
+              src: 'misc/ex02/she_glanced.wav',
+              intensity: { confused: 4, sad: 2 },
+              sentence:
+                '<default>She glanced at the clock nervously,</default> <confused>realizing she might be late,</confused> <sad>and disappointment filled her eyes.</sad>'
+            },
+            {
+              src: 'misc/ex02/the_lights_flickered.wav',
+              intensity: { whisper: 5, confused: 2 },
+              sentence:
+                '<default>The lights flickered once,</default> <whisper>casting strange shadows across the walls,</whisper> <confused>making me question what I saw.</confused>'
+            },
+            {
+              src: 'misc/ex02/the_teacher.wav',
+              intensity: { confused: 3, sad: 1 },
+              sentence:
+                '<default>The teacher asked the question,</default> <confused>and I totally blanked out,</confused> <sad>feeling the embarrassment creep in.</sad>'
+            },
+            {
+              src: 'misc/ex02/they_told_me.wav',
+              intensity: { enunciated: 5, happy: 2 },
+              sentence:
+                '<default>They told me the journey would be tough,</default> <enunciated>but I was ready—mind, body, and soul,</enunciated> <happy>because I knew what was waiting at the end.</happy>'
+            },
+            {
+              src: 'misc/ex02/we_rehearsed.wav',
+              sentence:
+                '<default>We rehearsed the plan carefully,</default> <enunciated>each step had to be perfect,</enunciated> <happy>success was finally within reach.</happy>'
+            },
+            {
+              src: 'misc/ex02/we_were_supposed_to_meet_at_seven.wav',
+              sentence:
+                '<default>We were supposed to meet at seven,</default> <confused>but no one showed up,</confused> <sad>and I waited alone in the rain.</sad>'
+            },
+
+            {
+              src: 'unrelated/i_walked_into/confused.wav',
+              sentence:
+                '<default>I walked into the room and</default> <confused>greeted everyone confidently.</confused>'
+            },
+            {
+              src: 'unrelated/i_walked_into/enunciated.wav',
+              sentence:
+                '<default>I walked into the room and</default> <enunciated>mumbled an apology under my breath.</enunciated>'
+            },
+            {
+              src: 'unrelated/i_walked_into/happy.wav',
+              sentence:
+                '<default>I walked into the room and</default> <happy>greeted everyone with a heavy sigh.</happy>'
+            },
+            {
+              src: 'unrelated/i_walked_into/sad.wav',
+              sentence:
+                '<default>I walked into the room and</default> <sad>greeted everyone with a big smile.</sad>'
+            },
+            {
+              src: 'unrelated/she_picked_up/confused.wav',
+              sentence:
+                '<default>She picked up the phone and</default> <confused>answered assertively.</confused>'
+            },
+            {
+              src: 'unrelated/she_picked_up/happy.wav',
+              sentence:
+                '<default>She picked up the phone and</default> <happy>reluctantly answered the call!</happy>'
+            },
+            {
+              src: 'unrelated/she_picked_up/sad.wav',
+              sentence:
+                '<default>She picked up the phone and</default> <sad>cheerfully answered the call.</sad>'
+            },
+            {
+              src: 'unrelated/she_picked_up/whisper.wav',
+              sentence:
+                '<default>She picked up the phone and</default> <whisper>shouted into the receiver.</whisper>'
+            }
+          ],
+          intensityTags: ['happy','sad','confused','enunciated','whisper'],
+          intensitySentences: {
+            happy:
+              '<default>I walked into the office,</default> <happy>found a surprise cake waiting,</happy> <default>and then got back to work.</default>',
+            sad:
+              '<default>She listened to the news,</default> <sad>her eyes welling up with tears,</sad> <default>then continued preparing dinner.</default>',
+            confused:
+              '<default>We sat in the car,</default> <confused>unsure which road to take,</confused> <default>and finally picked one at random.</default>',
+            enunciated:
+              '<default>He started his speech,</default> <enunciated>clearly laying out every point,</enunciated> <default>and thanked the audience at the end.</default>',
+            whisper:
+              '<default>I read the email,</default> <whisper>murmured the shocking part to myself,</whisper> <default>and deleted it without replying.</default>'
+          },
+          currentSection:''
+        };
+      },
+      computed: {
+        miscItems() { return this.items.filter(i=>i.src.startsWith('misc/')); },
+        mismatchedItems() { return this.items.filter(i=>i.src.startsWith('unrelated/')); }
+      },
+      methods: {
+        parseSentence(str) {
+          const re=/\<([a-z]+)\>([^<]+)\<\/\1\>/g;
+          let last=0, segs=[], m;
+          while((m=re.exec(str))!==null){
+            if(m.index>last) segs.push({tag:'default',text:str.slice(last,m.index)});
+            segs.push({tag:m[1],text:m[2]});
+            last=re.lastIndex;
+          }
+          if(last<str.length) segs.push({tag:'default',text:str.slice(last)});
+          return segs;
+        },
+        uniqueTags(s) { return [...new Set(this.parseSentence(s).map(x=>x.tag))]; },
+        bgColorClass(tag){
+          return {
+            default:'bg-gray-700', happy:'bg-amber-500',
+            sad:'bg-blue-500', confused:'bg-purple-500',
+            enunciated:'bg-emerald-500', whisper:'bg-gray-400'
+          }[tag]||'bg-gray-500';
+        }
+      },
+      mounted(){
+        const obs=new IntersectionObserver(es=>{
+          es.forEach(e=>{ if(e.isIntersecting) this.currentSection=e.target.id});
+        },{threshold:0.5});
+        this.sections.forEach(s=>{
+          const el=document.getElementById(s.id);
+          if(el) obs.observe(el);
+        });
+      }
+    }).mount('#app');
+  </script>
+</body>
+</html>
+
