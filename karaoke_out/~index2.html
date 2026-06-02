@@ -1,0 +1,153 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Sink-aligned reader</title>
+<style>
+  :root { color-scheme: dark; }
+  body {
+    margin: 0; background: #0e0e10; color: #e8e8ea;
+    font: 16px/1.6 -apple-system, system-ui, sans-serif;
+    display: flex; flex-direction: column; height: 100vh;
+  }
+  header {
+    padding: 14px 20px; border-bottom: 1px solid #2a2a2e;
+    display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+  }
+  h1 { font-size: 14px; font-weight: 600; margin: 0; color: #a0a0a8; letter-spacing: .03em; }
+  audio { height: 34px; }
+  .legend { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #888; }
+  #text {
+    flex: 1; overflow-y: auto; padding: 30px 22px 50vh;
+    font-size: 19px; line-height: 2.0;
+  }
+  .tok {
+    border-radius: 3px; cursor: pointer;
+    background: transparent;
+    white-space: pre-wrap;
+  }
+  .tok.current { color: #fff; }
+  .tok.future  { opacity: .35; }
+  footer { padding: 8px 20px; font-size: 12px; color: #555; border-top: 1px solid #2a2a2e; }
+</style>
+
+<header>
+  <h1>SINK-ALIGNED READER</h1>
+  <audio id="audio" src="audio.wav" controls></audio>
+  <label class="legend"><input type="checkbox" id="follow" checked> auto-scroll</label>
+  <label class="legend"><input type="checkbox" id="suppress"> multiply by (1 − Σsinks)</label>
+  <label class="legend">offset
+    <input type="number" id="offset" value="0.1" step="0.05" style="width:64px"> s
+  </label>
+</header>
+
+<div id="text">loading…</div>
+
+<footer id="status"></footer>
+
+<script>
+const HIGHLIGHT_RGB = [77, 210, 255];   // single highlight color (cyan)
+
+let DATA = null, spans = [];
+let lastStep = -1, lastCur = -1;
+const paintedIdx = [];                  // tokens painted by the previous step
+
+fetch("karaoke.json")
+  .then(r => r.json())
+  .then(d => { DATA = d; build(); })
+  .catch(e => {
+    document.getElementById("text").textContent =
+      "could not load karaoke.json — keep it in the same folder and serve over http.";
+    console.error(e);
+  });
+
+function build() {
+  const box = document.getElementById("text");
+  box.innerHTML = "";
+  DATA.tokens.forEach((tok, i) => {
+    const span = document.createElement("span");
+    span.className = "tok future";
+    span.textContent = tok;
+    span.title = `t=${DATA.start[i].toFixed(2)}s`;
+    span.onclick = () => {
+      const offset = parseFloat(offsetEl.value) || 0;
+      audio.currentTime = Math.max(0, DATA.start[i] - offset);
+      audio.play();
+    };
+    box.appendChild(span);
+    spans.push(span);
+  });
+  document.getElementById("status").textContent =
+    `${DATA.tokens.length} tokens · ${DATA.step_time.length} steps · `
+    + `${DATA.duration.toFixed(1)}s · R=${DATA.R}`;
+}
+
+function stepAt(time) {
+  const st = DATA.step_time;
+  let lo = 0, hi = st.length - 1, ans = 0;
+  while (lo <= hi) {
+    const mid = (lo + hi) >> 1;
+    if (st[mid] <= time) { ans = mid; lo = mid + 1; }
+    else hi = mid - 1;
+  }
+  return ans;
+}
+
+const audio    = document.getElementById("audio");
+const follow   = document.getElementById("follow");
+const offsetEl = document.getElementById("offset");
+const suppress = document.getElementById("suppress");
+
+function render() {
+  if (!DATA) { requestAnimationFrame(render); return; }
+  const offset = parseFloat(offsetEl.value) || 0;
+  const step   = stepAt(audio.currentTime + offset);
+
+  if (step !== lastStep) {
+    // clear previous step's window
+    for (const i of paintedIdx) spans[i].style.background = "transparent";
+    paintedIdx.length = 0;
+
+    const phi  = DATA.step_phi[step];
+    const win  = DATA.step_win[step];                  // length 2R+1, 0..1
+    const R    = DATA.R;
+    const mult = suppress.checked ? DATA.step_text_frac[step] : 1.0;
+
+    // paint the window: key k -> tokens 2k, 2k+1; alpha = win[k] * mult
+    for (let k = 0; k < win.length; k++) {
+      const keyIdx = phi - R + k;
+      if (keyIdx < 0) continue;
+      const a = win[k] * mult;
+      if (a < 0.02) continue;
+      const alpha = Math.min(0.85, a);                 // cap so even saturated cells aren't opaque
+      const rgba = `rgba(${HIGHLIGHT_RGB[0]},${HIGHLIGHT_RGB[1]},${HIGHLIGHT_RGB[2]},${alpha})`;
+      for (const ti of [2 * keyIdx, 2 * keyIdx + 1]) {
+        if (ti >= 0 && ti < spans.length) {
+          spans[ti].style.background = rgba;
+          spans[ti].classList.remove("future");
+          paintedIdx.push(ti);
+        }
+      }
+    }
+
+    // un-fade everything up to the current position (spoken region stays full opacity)
+    const curTok = 2 * phi;
+    for (let i = 0; i <= Math.min(curTok + 1, spans.length - 1); i++) {
+      spans[i].classList.remove("future");
+    }
+
+    // current outline at window center
+    const cur = curTok;
+    if (cur !== lastCur) {
+      if (lastCur >= 0 && lastCur < spans.length) spans[lastCur].classList.remove("current");
+      if (cur < spans.length) {
+        spans[cur].classList.add("current");
+        if (follow.checked)
+          spans[cur].scrollIntoView({ block: "center", behavior: "smooth" });
+      }
+      lastCur = cur;
+    }
+    lastStep = step;
+  }
+  requestAnimationFrame(render);
+}
+requestAnimationFrame(render);
+</script>

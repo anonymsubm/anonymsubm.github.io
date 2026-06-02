@@ -1,0 +1,1 @@
+When played, failure cards are set aside and not returned to the deck.

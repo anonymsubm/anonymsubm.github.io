@@ -1,0 +1,46 @@
+{
+  "version": 1,
+  "items": [
+    {
+      "name": "2",
+      "title": "1",
+      "json": "w4.json",
+      "audio": "w4.webm",
+      "duration": 1200.0,
+      "n_tokens": 27993,
+      "n_steps": 15000,
+      "R": 4
+    },
+
+    {
+      "name": "3",
+      "title": "2",
+      "json": "m3.json",
+      "audio": "m3.webm",
+      "duration": 1200.0,
+      "n_tokens": 28091,
+      "n_steps": 15000,
+      "R": 4
+    },
+    {
+      "name": "1",
+      "title": "3",
+      "json": "w3.json",
+      "audio": "w3.webm",
+      "duration": 1200.0,
+      "n_tokens": 27833,
+      "n_steps": 15000,
+      "R": 4
+    },
+    {
+      "name": "4",
+      "title": "4",
+      "json": "m4.json",
+      "audio": "m4.webm",
+      "duration": 1200.0,
+      "n_tokens": 27674,
+      "n_steps": 15000,
+      "R": 4
+    }
+  ]
+}

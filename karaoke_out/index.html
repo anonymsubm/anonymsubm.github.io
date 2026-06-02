@@ -1,0 +1,786 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Sink-aligned reader</title>
+
+<style>
+  :root { color-scheme: dark; }
+
+  body {
+    margin: 0;
+    background: #0e0e10;
+    color: #e8e8ea;
+    font: 16px/1.6 -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+  }
+
+  header {
+    padding: 14px 20px;
+    border-bottom: 1px solid #2a2a2e;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  h1 {
+    font-size: 14px;
+    font-weight: 600;
+    margin: 0;
+    color: #a0a0a8;
+    letter-spacing: .03em;
+  }
+
+  audio { height: 34px; }
+
+  .legend {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: #888;
+  }
+
+  input[type="number"] {
+    width: 64px;
+    background: #111;
+    color: #e8e8ea;
+    border: 1px solid #333;
+    border-radius: 4px;
+    padding: 2px 5px;
+  }
+
+  input[type="range"] {
+    width: 100px;
+  }
+
+  input[type="checkbox"] {
+    accent-color: #4d92ff;
+  }
+
+  select {
+    background: #111;
+    color: #e8e8ea;
+    border: 1px solid #333;
+    border-radius: 4px;
+    padding: 3px 6px;
+    font: inherit;
+    font-size: 12px;
+    max-width: 240px;
+  }
+
+  .value {
+    min-width: 40px;
+    color: #bbb;
+    font-variant-numeric: tabular-nums;
+  }
+
+  #text {
+    flex: 1;
+    overflow-y: auto;
+    padding: 30px 22px 50vh;
+    font-size: 19px;
+    line-height: 2.0;
+  }
+
+  .tok {
+    border-radius: 3px;
+    cursor: pointer;
+    background: transparent;
+    white-space: pre-wrap;
+  }
+
+  .tok.current {
+    color: #fff;
+  }
+
+  .tok.future {
+    opacity: .35;
+  }
+
+  footer {
+    padding: 8px 20px;
+    font-size: 12px;
+    color: #555;
+    border-top: 1px solid #2a2a2e;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .swatch {
+    display: inline-block;
+    width: 11px;
+    height: 11px;
+    border-radius: 3px;
+    vertical-align: -1px;
+    margin-right: 6px;
+    border: 1px solid rgba(255,255,255,.25);
+  }
+
+  /* ---- Global activity visualizer ------------------------------ */
+  .orb-wrap {
+    --orb-r: 32;
+    --orb-g: 102;
+    --orb-b: 41;
+    --orb-i: 0;
+    --orb-speed: 2.4s;
+    --orb-flare: 0;
+
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin-left: auto;
+    font-size: 12px;
+    color: #888;
+    user-select: none;
+  }
+
+  .orb {
+    position: relative;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    flex: none;
+
+    background:
+      radial-gradient(
+        circle at 50% 45%,
+        rgba(255, 255, 255,
+              calc(0.25 + 0.55 * var(--orb-i) + 0.45 * var(--orb-flare))) 0%,
+        rgba(var(--orb-r), var(--orb-g), var(--orb-b),
+              calc(0.55 + 0.45 * var(--orb-i))) 38%,
+        rgba(var(--orb-r), var(--orb-g), var(--orb-b),
+              calc(0.20 + 0.30 * var(--orb-i))) 100%
+      );
+
+    box-shadow:
+      0 0 calc(4px + 14px * var(--orb-i) + 10px * var(--orb-flare))
+        rgba(var(--orb-r), var(--orb-g), var(--orb-b),
+              calc(0.30 + 0.50 * var(--orb-i) + 0.40 * var(--orb-flare))),
+      0 0 calc(10px + 40px * var(--orb-i) + 26px * var(--orb-flare))
+        rgba(var(--orb-r), var(--orb-g), var(--orb-b),
+              calc(0.10 + 0.40 * var(--orb-i) + 0.35 * var(--orb-flare)));
+
+    transition:
+      box-shadow .12s ease-out,
+      background .12s ease-out;
+
+    transform: scale(calc(1 + 0.16 * var(--orb-i) + 0.22 * var(--orb-flare)));
+  }
+
+  .orb::after {
+    content: "";
+    position: absolute;
+    inset: -3px;
+    border-radius: 50%;
+    box-shadow: 0 0 14px
+      rgba(var(--orb-r), var(--orb-g), var(--orb-b),
+            calc(0.18 + 0.55 * var(--orb-i)));
+    animation: orb-breathe var(--orb-speed) ease-in-out infinite;
+    opacity: calc(0.25 + 0.75 * var(--orb-i));
+  }
+
+  .orb::before {
+    content: "";
+    position: absolute;
+    inset: calc(-4px - 6px * var(--orb-flare));
+    border-radius: 50%;
+    pointer-events: none;
+    box-shadow: 0 0 calc(8px + 22px * var(--orb-flare))
+      rgba(255, 255, 255, calc(0.55 * var(--orb-flare)));
+    opacity: var(--orb-flare);
+  }
+
+  @keyframes orb-breathe {
+    0%, 100% { transform: scale(0.88); opacity: .50; }
+    50%      { transform: scale(1.16); opacity: 1;   }
+  }
+
+  .orb-label {
+    font-variant-numeric: tabular-nums;
+    min-width: 132px;
+  }
+  .orb-label b {
+    color: #cfcfd4;
+    font-weight: 600;
+  }
+</style>
+
+<header>
+  <h1>SINK-ALIGNED READER</h1>
+
+  <label class="legend">
+    take
+    <select id="takeSel"></select>
+  </label>
+
+  <audio id="audio" controls></audio>
+
+  <label class="legend">
+    <input type="checkbox" id="follow" checked>
+    auto-scroll
+  </label>
+
+  <label class="legend">
+    <input type="checkbox" id="sinkOpacity" checked>
+    sink affects opacity
+  </label>
+
+  <label class="legend">
+    offset
+    <input type="number" id="offset" value="0.10" step="0.05"> s
+  </label>
+
+  <label class="legend">
+    max alpha
+    <input type="range" id="maxAlpha" min="0.05" max="1.00" step="0.01" value="0.85">
+    <span class="value" id="maxAlphaVal">0.85</span>
+  </label>
+
+  <label class="legend">
+    sink min opacity
+    <input type="range" id="sinkMinOpacity" min="0.00" max="0.80" step="0.01" value="0.10">
+    <span class="value" id="sinkMinOpacityVal">0.10</span>
+  </label>
+
+  <label class="legend">
+    color contrast
+    <input type="range" id="sinkContrast" min="0.25" max="4.00" step="0.05" value="1.50">
+    <span class="value" id="sinkContrastVal">1.50</span>
+  </label>
+
+  <label class="legend">
+    viz radius
+    <input type="range" id="vizR" min="0" max="2" step="1" value="2">
+    <span class="value" id="vizRVal">2</span>
+  </label>
+
+  <label class="legend">
+    <input type="checkbox" id="renorm" checked>
+    re-normalize window
+  </label>
+
+  <div class="orb-wrap" id="orbWrap" title="Global reading activity — brighter = model actively attending to text; dim = attention parked on sink tokens">
+    <div class="orb" id="orb"></div>
+    <span class="orb-label" id="orbLabel">sink&nbsp;<b>0.000</b></span>
+  </div>
+</header>
+
+<div id="text">loading…</div>
+
+<footer id="status"></footer>
+
+<script>
+let DATA = null;
+let MANIFEST = null;
+let CURRENT_TAKE = null;
+let spans = [];
+let lastStep = -1;
+let lastCur = -1;
+let forceRepaint = false;
+
+let SINK_STATS = { lo: 0, hi: 1 };
+
+const paintedIdx = [];
+
+const audio = document.getElementById("audio");
+const takeSel = document.getElementById("takeSel");
+const follow = document.getElementById("follow");
+const sinkOpacityEl = document.getElementById("sinkOpacity");
+const offsetEl = document.getElementById("offset");
+const statusEl = document.getElementById("status");
+
+const maxAlphaEl = document.getElementById("maxAlpha");
+const maxAlphaVal = document.getElementById("maxAlphaVal");
+
+const sinkMinOpacityEl = document.getElementById("sinkMinOpacity");
+const sinkMinOpacityVal = document.getElementById("sinkMinOpacityVal");
+
+const sinkContrastEl = document.getElementById("sinkContrast");
+const sinkContrastVal = document.getElementById("sinkContrastVal");
+
+const vizREl = document.getElementById("vizR");
+const vizRVal = document.getElementById("vizRVal");
+const renormEl = document.getElementById("renorm");
+
+const orbWrap = document.getElementById("orbWrap");
+const orbLabel = document.getElementById("orbLabel");
+
+// ---- Orb animation state -------------------------------------
+let orbCur = 0;
+let orbTarget = 0;
+let orbFlare = 0;
+let orbLastTs = 0;
+
+function tickOrb(ts) {
+  const dt = orbLastTs ? Math.min(0.05, (ts - orbLastTs) / 1000) : 0.016;
+  orbLastTs = ts;
+
+  const rising = orbTarget > orbCur;
+  const k = rising ? 14 : 8;
+  orbCur += (orbTarget - orbCur) * (1 - Math.exp(-k * dt));
+
+  orbFlare *= Math.exp(-6.0 * dt);
+  if (orbFlare < 0.002) orbFlare = 0;
+
+  const shown = clamp01(orbCur);
+  const period = (3.0 - 2.2 * shown).toFixed(2);
+
+  orbWrap.style.setProperty("--orb-i", shown.toFixed(4));
+  orbWrap.style.setProperty("--orb-flare", clamp01(orbFlare).toFixed(4));
+  orbWrap.style.setProperty("--orb-speed", period + "s");
+
+  requestAnimationFrame(tickOrb);
+}
+requestAnimationFrame(tickOrb);
+
+// ---- Boot: try manifest.json, fall back to legacy karaoke.json --
+// New layout:  manifest.json + <name>.json + <name>.wav  (multiple takes)
+// Old layout:  karaoke.json + audio.wav                  (single take)
+boot();
+
+function boot() {
+  fetch("manifest.json", { cache: "no-store" })
+    .then(r => {
+      if (!r.ok) throw new Error("no manifest");
+      return r.json();
+    })
+    .then(m => {
+      MANIFEST = m;
+      populateTakeSelector(m);
+
+      // Load first take (or the one named in #hash, e.g. #take_002).
+      const want = decodeURIComponent((location.hash || "").slice(1));
+      const items = m.items || [];
+      const chosen = items.find(it => it.name === want) || items[0];
+
+      if (!chosen) {
+        document.getElementById("text").textContent =
+          "manifest.json contains no items.";
+        return;
+      }
+
+      takeSel.value = chosen.name;
+      loadTake(chosen);
+    })
+    .catch(() => {
+      // Legacy single-pair fallback. Hide the selector since there's
+      // nothing to choose from.
+      takeSel.parentElement.style.display = "none";
+      loadTake({
+        name: "karaoke",
+        title: "karaoke",
+        json: "karaoke.json",
+        audio: "audio.wav",
+      });
+    });
+}
+
+function populateTakeSelector(manifest) {
+  takeSel.innerHTML = "";
+
+  for (const it of (manifest.items || [])) {
+    const opt = document.createElement("option");
+    opt.value = it.name;
+
+    const dur = (typeof it.duration === "number")
+      ? ` (${it.duration.toFixed(1)}s)`
+      : "";
+
+    opt.textContent = (it.title || it.name) + dur;
+    takeSel.appendChild(opt);
+  }
+
+  takeSel.onchange = () => {
+    const items = (MANIFEST && MANIFEST.items) || [];
+    const it = items.find(x => x.name === takeSel.value);
+    if (it) {
+      location.hash = encodeURIComponent(it.name);
+      loadTake(it);
+    }
+  };
+}
+
+function loadTake(item) {
+  CURRENT_TAKE = item;
+
+  // Reset rendering state. Without this the old painted spans linger
+  // and lastStep/lastCur point into the previous take's arrays.
+  DATA = null;
+  spans = [];
+  paintedIdx.length = 0;
+  lastStep = -1;
+  lastCur = -1;
+  forceRepaint = true;
+
+  document.getElementById("text").textContent = "loading…";
+
+  // Pause + swap audio source. preload="auto" + load() forces the
+  // browser to refetch instead of holding the previous take's buffer.
+  audio.pause();
+  audio.currentTime = 0;
+
+  fetch(item.json, { cache: "no-store" })
+    .then(r => {
+      if (!r.ok) throw new Error("failed to load " + item.json);
+      return r.json();
+    })
+    .then(d => {
+      DATA = d;
+
+      // Prefer the audio path the JSON declares, fall back to the
+      // manifest entry, and finally to <name>.wav.
+      const audioSrc = d.audio || item.audio || (item.name + ".wav");
+      audio.src = audioSrc;
+      audio.load();
+
+      build();
+    })
+    .catch(e => {
+      document.getElementById("text").textContent =
+        "could not load " + item.json +
+        " — keep it in the same folder and serve over http.";
+      console.error(e);
+    });
+}
+
+function updateLabels() {
+  maxAlphaVal.textContent = Number(maxAlphaEl.value).toFixed(2);
+  sinkMinOpacityVal.textContent = Number(sinkMinOpacityEl.value).toFixed(2);
+  vizRVal.textContent = String(parseInt(vizREl.value, 10));
+  sinkContrastVal.textContent = Number(sinkContrastEl.value).toFixed(2);
+}
+
+function clamp01(x) {
+  return Math.max(0, Math.min(1, x));
+}
+
+function lerp(a, b, t) {
+  return a + (b - a) * t;
+}
+
+function percentile(xs, p) {
+  if (!xs.length) return 0;
+
+  const sorted = [...xs].sort((a, b) => a - b);
+  const idx = Math.min(
+    sorted.length - 1,
+    Math.max(0, Math.floor(p * sorted.length))
+  );
+
+  return sorted[idx];
+}
+
+function computeSinkStats() {
+  if (!DATA.step_text_frac || DATA.step_text_frac.length === 0) {
+    SINK_STATS = { lo: 0, hi: 1 };
+    return;
+  }
+
+  const sinks = DATA.step_text_frac.map(tf => clamp01(1.0 - tf));
+
+  let lo = percentile(sinks, 0.05);
+  let hi = percentile(sinks, 0.95);
+
+  if (hi - lo < 0.001) {
+    lo = Math.max(0, lo - 0.05);
+    hi = Math.min(1, hi + 0.05);
+  }
+
+  SINK_STATS = { lo, hi };
+}
+
+function normalizeSink(sink) {
+  const lo = SINK_STATS.lo;
+  const hi = SINK_STATS.hi;
+  return clamp01((sink - lo) / Math.max(1e-6, hi - lo));
+}
+
+function smoothstep(t) {
+  t = clamp01(t);
+  return t * t * (3 - 2 * t);
+}
+
+function mixRGB(a, b, t) {
+  t = clamp01(t);
+
+  return [
+    Math.round(lerp(a[0], b[0], t)),
+    Math.round(lerp(a[1], b[1], t)),
+    Math.round(lerp(a[2], b[2], t)),
+  ];
+}
+
+function colorFromSink(sink) {
+  const contrast = parseFloat(sinkContrastEl.value) || 1.5;
+
+  let t = normalizeSink(sink);
+
+  t = Math.pow(t, 1.0 / contrast);
+  t = smoothstep(t);
+
+  const low_sink = [32, 102, 41];
+  const high_sink = [32, 102, 41];
+
+  const rgb = mixRGB(low_sink, high_sink, t);
+
+  return {
+    r: rgb[0],
+    g: rgb[1],
+    b: rgb[2],
+    norm: t,
+  };
+}
+
+function sinkOpacityMultiplier(sink) {
+  if (!sinkOpacityEl.checked) return 1.0;
+
+  const sinkNorm = normalizeSink(sink);
+  const minOpacity = clamp01(parseFloat(sinkMinOpacityEl.value) || 0.10);
+
+  return minOpacity + (1.0 - minOpacity) * (1.0 - sinkNorm);
+}
+
+function stepAt(time) {
+  const st = DATA.step_time;
+
+  let lo = 0;
+  let hi = st.length - 1;
+  let ans = 0;
+
+  while (lo <= hi) {
+    const mid = (lo + hi) >> 1;
+
+    if (st[mid] <= time) {
+      ans = mid;
+      lo = mid + 1;
+    } else {
+      hi = mid - 1;
+    }
+  }
+
+  return ans;
+}
+
+function clearPainted() {
+  for (const i of paintedIdx) {
+    if (i >= 0 && i < spans.length) {
+      spans[i].style.background = "transparent";
+    }
+  }
+
+  paintedIdx.length = 0;
+}
+
+function updateFutureClasses(curTok) {
+  const cutoff = Math.min(curTok + 1, spans.length - 1);
+
+  for (let i = 0; i < spans.length; i++) {
+    if (i <= cutoff) {
+      spans[i].classList.remove("future");
+    } else {
+      spans[i].classList.add("future");
+    }
+  }
+}
+
+let listenersWired = false;
+
+function build() {
+  const box = document.getElementById("text");
+  box.innerHTML = "";
+  spans = [];
+
+  DATA.tokens.forEach((tok, i) => {
+    const span = document.createElement("span");
+    span.className = "tok future";
+    span.textContent = tok;
+    span.title = `t=${DATA.start[i].toFixed(2)}s`;
+
+    span.onclick = () => {
+      const offset = parseFloat(offsetEl.value) || 0;
+      audio.currentTime = Math.max(0, DATA.start[i] - offset);
+      audio.play();
+    };
+
+    box.appendChild(span);
+    spans.push(span);
+  });
+
+  computeSinkStats();
+
+  // Slider can only shrink the displayed window: 0 .. DATA.R.
+  vizREl.max = String(DATA.R);
+  if (parseInt(vizREl.value, 10) > DATA.R) {
+    vizREl.value = String(DATA.R);
+  }
+
+  // Wire control listeners once. They re-run on every take.
+  if (!listenersWired) {
+    for (const el of [
+      maxAlphaEl,
+      sinkMinOpacityEl,
+      sinkContrastEl,
+      offsetEl,
+      sinkOpacityEl,
+      vizREl,
+      renormEl
+    ]) {
+      el.addEventListener("input", () => {
+        updateLabels();
+        forceRepaint = true;
+      });
+
+      el.addEventListener("change", () => {
+        updateLabels();
+        forceRepaint = true;
+      });
+    }
+    listenersWired = true;
+  }
+
+  updateLabels();
+
+  statusEl.textContent =
+    `${DATA.tokens.length} tokens · ${DATA.step_time.length} steps · ` +
+    `${DATA.duration.toFixed(1)}s · R=${DATA.R}`;
+
+  forceRepaint = true;
+}
+
+function render() {
+  if (!DATA) {
+    requestAnimationFrame(render);
+    return;
+  }
+
+  const offset = parseFloat(offsetEl.value) || 0;
+  const step = stepAt(audio.currentTime + offset);
+
+  if (step !== lastStep || forceRepaint) {
+    forceRepaint = false;
+
+    clearPainted();
+
+    const phi = DATA.step_phi[step];
+    const win = DATA.step_win[step];
+    const R = DATA.R;
+
+    const textFrac = DATA.step_text_frac
+      ? clamp01(DATA.step_text_frac[step])
+      : 1.0;
+
+    const sink = clamp01(1.0 - textFrac);
+    const sinkNorm = normalizeSink(sink);
+
+    const maxAlpha = parseFloat(maxAlphaEl.value) || 0.85;
+    const c = colorFromSink(sink);
+    const sinkMult = sinkOpacityMultiplier(sink);
+
+    {
+      const activity = clamp01(1.0 - sinkNorm);
+      const orbI = clamp01(Math.pow(activity, 0.75));
+
+      const jump = orbI - orbTarget;
+      if (jump > 0.06) {
+        orbFlare = clamp01(orbFlare + Math.min(1.0, jump * 2.4));
+      }
+
+      orbTarget = orbI;
+
+      orbWrap.style.setProperty("--orb-r", c.r);
+      orbWrap.style.setProperty("--orb-g", c.g);
+      orbWrap.style.setProperty("--orb-b", c.b);
+      orbLabel.innerHTML =
+        `sink&nbsp;<b>${sink.toFixed(3)}</b>`;
+    }
+
+    const r = Math.min(
+      Math.max(0, parseInt(vizREl.value, 10) || 0),
+      R
+    );
+    const kLo = R - r;
+    const kHi = R + r;
+
+    let visPeak = 1.0;
+    if (renormEl.checked) {
+      let m = 0;
+      for (let k = kLo; k <= kHi; k++) {
+        const keyIdx = phi - R + k;
+        if (keyIdx < 0) continue;
+        const v = clamp01(win[k]);
+        if (v > m) m = v;
+      }
+      visPeak = m > 0 ? m : 1.0;
+    }
+
+    for (let k = kLo; k <= kHi; k++) {
+      const keyIdx = phi - R + k;
+      if (keyIdx < 0) continue;
+
+      const wv = clamp01(win[k]) / visPeak;
+      const alpha = clamp01(wv) * maxAlpha * sinkMult;
+
+      if (alpha < 0.01) continue;
+
+      const bg = `rgba(${c.r}, ${c.g}, ${c.b}, ${alpha})`;
+
+      for (const ti of [2 * keyIdx, 2 * keyIdx + 1]) {
+        if (ti >= 0 && ti < spans.length) {
+          spans[ti].style.background = bg;
+          paintedIdx.push(ti);
+        }
+      }
+    }
+
+    const curTok = 2 * phi;
+    updateFutureClasses(curTok);
+
+    if (curTok !== lastCur) {
+      if (lastCur >= 0 && lastCur < spans.length) {
+        spans[lastCur].classList.remove("current");
+      }
+
+      if (curTok >= 0 && curTok < spans.length) {
+        spans[curTok].classList.add("current");
+
+        if (follow.checked) {
+          spans[curTok].scrollIntoView({
+            block: "center",
+            behavior: "smooth"
+          });
+        }
+      }
+
+      lastCur = curTok;
+    }
+
+    const swatch = `rgb(${c.r}, ${c.g}, ${c.b})`;
+    const takeLabel = CURRENT_TAKE
+      ? `${CURRENT_TAKE.title || CURRENT_TAKE.name} · `
+      : "";
+
+    statusEl.innerHTML =
+      `<span class="swatch" style="background:${swatch}"></span>` +
+      takeLabel +
+      `${DATA.tokens.length} tokens · ` +
+      `${DATA.step_time.length} steps · ` +
+      `${DATA.duration.toFixed(1)}s · ` +
+      `R=${DATA.R} · ` +
+      `vizR=${r}${renormEl.checked ? " (renorm)" : ""} · ` +
+      `step=${step} · ` +
+      `phi=${phi} · ` +
+      `sink=${sink.toFixed(3)} · ` +
+      `sinkNorm=${sinkNorm.toFixed(3)} · ` +
+      `text=${textFrac.toFixed(3)} · ` +
+      `opacityMult=${sinkMult.toFixed(3)} · ` +
+      `sinkRange=[${SINK_STATS.lo.toFixed(3)}, ${SINK_STATS.hi.toFixed(3)}]`;
+
+    lastStep = step;
+  }
+
+  requestAnimationFrame(render);
+}
+
+requestAnimationFrame(render);
+</script>

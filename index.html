@@ -1,0 +1,1438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PSW-Speech — Audio Demo</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    color-scheme: dark;
+    --bg:      #0e0e10;
+    --surface: #18181b;
+    --border:  #2e2e33;
+    --accent:  #4d8fff;
+    --text:    #e8e8ea;
+    --sub:     #666;
+    --miss:    #1e1e22;
+  }
+
+  body {
+    font-family: 'IBM Plex Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 3rem 2rem 6rem;
+  }
+
+  /* ── header ── */
+  header {
+    max-width: 960px;
+    margin: 3rem auto 3rem;
+    padding-left: 0;
+  }
+  header .title-row {
+    display: flex;
+    align-items: baseline;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.1rem;
+  }
+  header h1 {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: clamp(1.4rem, 3vw, 2.2rem);
+    font-weight: 500;
+    color: var(--text);
+    letter-spacing: -.03em;
+    border-left: 3px solid var(--accent);
+    padding-left: 1rem;
+  }
+  header h1 .accent { color: var(--accent); }
+  .abstract-block {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1.1rem 1.4rem;
+    max-width: 860px;
+  }
+  .abstract-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: .62rem;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: .5rem;
+  }
+  .abstract-block p {
+    font-size: .88rem;
+    color: #aaa;
+    line-height: 1.75;
+    max-width: 800px;
+  }
+  .tags { margin-top: .75rem; display: flex; gap: .4rem; flex-wrap: wrap; }
+  .tag {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: .68rem;
+    border: 1px solid var(--border);
+    color: var(--accent);
+    padding: .18rem .5rem;
+    border-radius: 2px;
+  }
+
+  /* ── section note (inline callout under a section heading) ── */
+  .section-note {
+    max-width: 960px;
+    margin: 0 auto 1.5rem;
+    background: #131c30;
+    border: 1px solid #1f3060;
+    border-radius: 4px;
+    padding: .7rem 1.1rem;
+    font-size: .82rem;
+    color: #8aa8d8;
+    line-height: 1.65;
+  }
+  .section-note strong {
+    color: #a8c4ff;
+    font-weight: 500;
+  }
+
+  /* ── example tabs ── */
+  .tabs-wrap {
+    max-width: 960px;
+    margin: 0 auto 2rem;
+  }
+  .tabs-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: .68rem;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--sub);
+    margin-bottom: .6rem;
+  }
+  .tabs {
+    display: flex;
+    gap: 0;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+    width: fit-content;
+    max-width: 100%;
+    flex-wrap: wrap;
+    background: var(--surface);
+  }
+  .tab-btn {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: .78rem;
+    background: transparent;
+    border: none;
+    border-right: 1px solid var(--border);
+    color: var(--sub);
+    padding: .55rem 1.1rem;
+    cursor: pointer;
+    transition: background .15s, color .15s;
+    white-space: nowrap;
+  }
+  .tab-btn:last-child { border-right: none; }
+  .tab-btn:hover { background: #222226; color: var(--text); }
+  .tab-btn.active { background: #1a2540; color: var(--accent); font-weight: 500; }
+
+  /* ── example panel ── */
+  .example-panel { display: none; }
+  .example-panel.active { display: block; }
+
+  /* ── prompt block ── */
+  .prompt-block {
+    max-width: 960px;
+    margin: 0 auto 1.75rem;
+    background: #131c30;
+    border: 1px solid #1f3060;
+    border-radius: 4px;
+    padding: .85rem 1.1rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  .prompt-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: .68rem;
+    color: var(--accent);
+    letter-spacing: .06em;
+    white-space: nowrap;
+  }
+  .prompt-block audio { flex: 1; height: 28px; min-width: 0; }
+
+  /* ── section title ── */
+  .section-title {
+    max-width: 960px;
+    margin: 0 auto .85rem;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: .68rem;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--sub);
+  }
+
+  /* ── table ── */
+  .table-wrap {
+    max-width: 960px;
+    margin: 0 auto 2.5rem;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow-x: auto;
+  }
+  table { width: 100%; border-collapse: collapse; }
+
+  thead th {
+    background: #141416;
+    padding: .65rem 1rem;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: .68rem;
+    font-weight: 500;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--sub);
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  thead th:first-child { color: var(--text); }
+
+  tbody tr { border-bottom: 1px solid var(--border); }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:nth-child(odd)  { background: var(--surface); }
+  tbody tr:nth-child(even) { background: #141416; }
+
+  td { padding: .6rem 1rem; vertical-align: middle; }
+
+  td.model-name {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: .78rem;
+    white-space: nowrap;
+  }
+  td.model-name .ours { color: var(--accent); }
+  td.model-name .dur  {
+    display: block;
+    font-size: .62rem;
+    color: var(--sub);
+    margin-top: .12rem;
+  }
+  td.audio-cell { min-width: 170px; }
+
+  /* ── audio player ── */
+  .audio-wrap { display: flex; align-items: center; gap: .5rem; }
+
+  .play-btn {
+    flex-shrink: 0;
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    border: 1px solid var(--accent);
+    background: transparent;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--accent);
+    transition: background .15s, transform .1s;
+  }
+  .play-btn:hover  { background: rgba(77,143,255,.12); }
+  .play-btn:active { transform: scale(.92); }
+  .play-btn svg    { width: 10px; height: 10px; }
+
+  .progress-bar {
+    flex: 1;
+    height: 3px;
+    background: #333338;
+    border-radius: 2px;
+    cursor: pointer;
+    position: relative;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--accent);
+    width: 0%;
+    border-radius: 2px;
+    transition: width .1s linear;
+  }
+
+  .unavailable {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: .65rem;
+    color: #555;
+    background: var(--miss);
+    padding: .18rem .45rem;
+    border-radius: 2px;
+    display: inline-block;
+  }
+
+  /* ── status ── */
+  #status {
+    max-width: 960px; margin: 4rem auto;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: .82rem; color: var(--sub);
+  }
+  #status.error { color: #e05c5c; }
+
+  /* ── footer ── */
+  footer {
+    max-width: 960px; margin: 3rem auto 0;
+    font-size: .72rem; color: #444;
+    border-top: 1px solid var(--border);
+    padding-top: 1.1rem;
+    font-family: 'IBM Plex Mono', monospace;
+    line-height: 1.7;
+  }
+
+  /* ════════════════════════════════════════════════════════════
+     ── Sink-aligned reader section ──
+     ════════════════════════════════════════════════════════════ */
+
+  #sink-section {
+    max-width: 960px;
+    margin: 0 auto 3.5rem;
+  }
+
+  /* Section heading — matches page header style */
+  .sink-heading {
+    border-left: 2px solid var(--accent);
+    padding-left: 1.25rem;
+    margin-bottom: 1.75rem;
+  }
+  .sink-heading h2 {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: clamp(1rem, 2vw, 1.35rem);
+    font-weight: 500;
+    color: var(--text);
+    letter-spacing: -.02em;
+  }
+  .sink-heading p {
+    margin-top: .4rem;
+    font-size: .83rem;
+    color: var(--sub);
+    line-height: 1.6;
+    max-width: 560px;
+  }
+
+  /* Controls bar */
+  .sink-controls {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: .55rem 1.1rem;
+    padding: .75rem 1rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    margin-bottom: 1rem;
+  }
+
+  .sink-ctrl-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: .68rem;
+    letter-spacing: .06em;
+    color: var(--sub);
+    display: flex;
+    align-items: center;
+    gap: .4rem;
+    white-space: nowrap;
+  }
+
+  .sink-ctrl-label input[type="range"] {
+    width: 80px;
+    accent-color: var(--accent);
+  }
+  .sink-ctrl-label input[type="number"] {
+    width: 58px;
+    background: var(--bg);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 2px 5px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: .72rem;
+  }
+  .sink-ctrl-label input[type="checkbox"] {
+    accent-color: var(--accent);
+    width: 13px; height: 13px;
+  }
+  .sink-ctrl-label select {
+    background: var(--bg);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 2px 6px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: .72rem;
+    max-width: 180px;
+  }
+  .sink-val {
+    font-variant-numeric: tabular-nums;
+    color: var(--text);
+    min-width: 32px;
+    display: inline-block;
+  }
+
+  /* Params toggle button */
+  #sinkParamsToggle {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: .68rem;
+    letter-spacing: .05em;
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    color: var(--sub);
+    padding: .22rem .65rem;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background .12s, color .12s;
+  }
+  #sinkParamsToggle:hover { background: #222226; color: var(--text); }
+
+  /* Collapsible params row */
+  #sinkParams {
+    display: none;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: .55rem 1.1rem;
+    width: 100%;
+    padding-top: .5rem;
+    border-top: 1px solid var(--border);
+    margin-top: .4rem;
+  }
+  #sinkParams.visible { display: flex; }
+
+  /* Take selector + audio row */
+  .sink-transport {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: .55rem 1rem;
+    flex: 1;
+    min-width: 0;
+  }
+
+  /* Orb */
+  .sink-orb-wrap {
+    --orb-r: 77; --orb-g: 143; --orb-b: 255;
+    --orb-i: 0;
+    --orb-speed: 2.4s;
+    --orb-flare: 0;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    margin-left: auto;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: .68rem;
+    color: var(--sub);
+    user-select: none;
+  }
+  .sink-orb {
+    position: relative;
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    flex: none;
+    background:
+      radial-gradient(
+        circle at 50% 45%,
+        rgba(255,255,255, calc(0.22 + 0.55*var(--orb-i) + 0.4*var(--orb-flare))) 0%,
+        rgba(var(--orb-r),var(--orb-g),var(--orb-b), calc(0.5+0.45*var(--orb-i))) 38%,
+        rgba(var(--orb-r),var(--orb-g),var(--orb-b), calc(0.18+0.3*var(--orb-i))) 100%
+      );
+    box-shadow:
+      0 0 calc(3px + 12px*var(--orb-i) + 8px*var(--orb-flare))
+        rgba(var(--orb-r),var(--orb-g),var(--orb-b), calc(0.25+0.45*var(--orb-i)+0.35*var(--orb-flare))),
+      0 0 calc(8px + 32px*var(--orb-i) + 20px*var(--orb-flare))
+        rgba(var(--orb-r),var(--orb-g),var(--orb-b), calc(0.08+0.35*var(--orb-i)+0.28*var(--orb-flare)));
+    transition: box-shadow .12s, background .12s;
+    transform: scale(calc(1 + 0.14*var(--orb-i) + 0.2*var(--orb-flare)));
+  }
+  .sink-orb::after {
+    content: "";
+    position: absolute;
+    inset: -3px;
+    border-radius: 50%;
+    box-shadow: 0 0 12px rgba(var(--orb-r),var(--orb-g),var(--orb-b), calc(0.15+0.5*var(--orb-i)));
+    animation: sinkOrbBreathe var(--orb-speed) ease-in-out infinite;
+    opacity: calc(0.2 + 0.8*var(--orb-i));
+  }
+  @keyframes sinkOrbBreathe {
+    0%,100% { transform: scale(.88); opacity: .45; }
+    50%     { transform: scale(1.14); opacity: 1; }
+  }
+  .sink-orb-label { font-variant-numeric: tabular-nums; }
+  .sink-orb-label b { color: #d0d0d8; font-weight: 600; }
+
+  /* Token text area */
+  .sink-text-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow-y: auto;
+    max-height: 420px;
+    padding: 1.5rem 1.25rem 4rem;
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 1.05rem;
+    line-height: 2.0;
+    color: var(--text);
+    margin-bottom: .65rem;
+  }
+
+  .sink-tok {
+    border-radius: 3px;
+    cursor: pointer;
+    background: transparent;
+    white-space: pre-wrap;
+    transition: none;
+  }
+  .sink-tok.current { color: #fff; font-weight: 500; }
+  .sink-tok.future  { opacity: .32; }
+
+  /* Status bar */
+  .sink-status {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: .62rem;
+    color: var(--sub);
+    font-variant-numeric: tabular-nums;
+    padding: .3rem 0;
+  }
+  .sink-swatch {
+    display: inline-block;
+    width: 9px; height: 9px;
+    border-radius: 2px;
+    vertical-align: -1px;
+    margin-right: 5px;
+    border: 1px solid rgba(255,255,255,.18);
+  }
+
+  /* Loading / error state */
+  .sink-loading {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: .8rem;
+    color: var(--sub);
+    padding: 2rem 0;
+    text-align: center;
+  }
+
+  /* ════════════════════════════════════════════════════════════
+     ── SEED Benchmark Section ──
+     ════════════════════════════════════════════════════════════ */
+
+  #seed-section {
+    max-width: 1200px;
+    margin: 3rem auto 4rem;
+    padding: 0 0;
+  }
+
+  .seed-heading {
+    border-left: 2px solid var(--accent);
+    padding-left: 1.25rem;
+    margin-bottom: 1.75rem;
+  }
+  .seed-heading h2 {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: clamp(1rem, 2vw, 1.35rem);
+    font-weight: 500;
+    color: var(--text);
+    letter-spacing: -.02em;
+  }
+  .seed-heading p {
+    margin-top: .4rem;
+    font-size: .83rem;
+    color: var(--sub);
+    line-height: 1.6;
+    max-width: 620px;
+  }
+
+  /* Scrollable table wrapper */
+  .seed-table-wrap {
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow-x: auto;
+  }
+
+  .seed-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: auto;
+  }
+
+  .seed-table thead th {
+    background: #141416;
+    padding: .65rem 1rem;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: .68rem;
+    font-weight: 500;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--sub);
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+  }
+  .seed-table thead th.col-prompt { color: #8bc4a8; min-width: 90px; max-width: 110px; background: #111a16; }
+  .seed-table thead th.col-text   { color: #a8c4ff; min-width: 180px; max-width: 280px; background: #11161f; }
+  .seed-table thead th.col-target { color: #c4a8ff; min-width: 90px; max-width: 110px; background: #16111f; }
+  .seed-table thead th.col-model  { min-width: 90px; }
+
+  .seed-table tbody tr { border-bottom: 1px solid var(--border); }
+  .seed-table tbody tr:last-child { border-bottom: none; }
+  .seed-table tbody tr:nth-child(odd)  { background: var(--surface); }
+  .seed-table tbody tr:nth-child(even) { background: #141416; }
+
+  .seed-table td {
+    padding: .55rem .75rem;
+    vertical-align: middle;
+  }
+
+  td.seed-prompt {
+    font-size: .78rem;
+    color: #8bc4a8;
+    line-height: 1.5;
+    min-width: 90px;
+    max-width: 110px;
+    background: rgba(20, 40, 30, 0.35);
+  }
+
+  td.seed-text {
+    font-size: .78rem;
+    color: #b0c4ee;
+    line-height: 1.5;
+    min-width: 180px;
+    max-width: 280px;
+    background: rgba(20, 28, 48, 0.35);
+  }
+
+  td.seed-target {
+    min-width: 90px;
+    max-width: 110px;
+    background: rgba(28, 20, 48, 0.35);
+  }
+
+  /* compact audio player for seed table */
+  td.seed-audio  { min-width: 90px; max-width: 110px; }
+  td.seed-prompt .audio-wrap,
+  td.seed-target .audio-wrap,
+  td.seed-audio  .audio-wrap { gap: .25rem; }
+  td.seed-prompt .progress-bar,
+  td.seed-target .progress-bar,
+  td.seed-audio  .progress-bar { min-width: 30px; }
+
+  /* Loading / error states inside seed section */
+  .seed-status {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: .72rem;
+    color: var(--sub);
+    padding: 1rem 0 .5rem;
+  }
+  .seed-status.error { color: #e05c5c; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="title-row">
+    <h1>PSW<span class="accent">-</span>Speech &mdash; Audio Demo</h1>
+  </div>
+  <div class="abstract-block">
+    <div class="abstract-label">Abstract</div>
+    <p>Existing text-to-speech (TTS) systems achieve high quality, yet streaming and long-form generation remain challenging. We propose simple adaptations to a standard encoder–decoder Transformer TTS architecture that enable both capabilities without limits on total duration. We first observe that attention patterns in these models are well organized, following a structure that motivates a specific windowing strategy: a prefixed sliding window for autoregressive decoding and a sliding cross-attention for text conditioning. Together, we show that these adaptations address length generalization and error accumulation while being fully streamable in text and audio. Trained exclusively on segments shorter than 30 seconds, our system produces seamless, consistent speech at practically unbounded lengths, outperforming baselines that rely on full context training. We validate the approach through continuous synthesis over hours long synthesis and demonstrate competitive results against state-of-the-art open-source baselines on both short- and long-form benchmarks.</p>
+  </div>
+</header>
+
+<!-- ══════════════════════════════════════════════════════════
+     Sink-aligned reader
+     ══════════════════════════════════════════════════════════ -->
+<section id="sink-section">
+
+  <div class="sink-heading">
+    <h2>Long-form synthesis &mdash; attention visualisation</h2>
+    <p>Cross-attention weights are visualised in real time as the model decodes.
+       Sink tokens attract a large share of attention mass throughout generation;
+       while they are not strictly necessary for synthesis quality, they prove valuable for analysis —
+       giving rise to a distinctive and interpretable signature that makes the decoding dynamics easy to follow.</p>
+    <p style="margin-top:.6rem;font-size:.83rem;color:var(--sub);line-height:1.65;">
+      The first <strong style="color:var(--text);font-weight:500;">8 seconds</strong> are the speaker prefix used to clone the target voice.
+    </p>
+    <p style="margin-top:.6rem;font-size:.78rem;color:var(--sub);line-height:1.6;">
+      Samples are capped at <strong style="color:var(--text);font-weight:500;">20 minutes</strong> here for efficiency.
+      The next section presents 10-second excerpts taken at various positions from hour-long runs for cross-model comparison.
+    </p>
+  </div>
+
+  <!-- Controls bar -->
+  <div class="sink-controls">
+
+    <!-- Always-visible transport -->
+    <div class="sink-transport">
+      <div>
+        <div class="tabs-label">Select example</div>
+        <div class="tabs" id="srTakeTabs" style="flex-wrap:wrap;"></div>
+      </div>
+      <audio id="srAudio" controls style="height:32px; min-width:240px; flex:1;"></audio>
+    </div>
+
+    <button id="sinkParamsToggle">params ▾</button>
+
+    <!-- Collapsible params -->
+    <div id="sinkParams">
+      <label class="sink-ctrl-label">
+        <input type="checkbox" id="srFollow" checked> auto-scroll
+      </label>
+      <label class="sink-ctrl-label">
+        <input type="checkbox" id="srSinkOpacity" checked> sink opacity
+      </label>
+      <label class="sink-ctrl-label">
+        offset&nbsp;<input type="number" id="srOffset" value="0" step="0.05">&nbsp;s
+      </label>
+      <label class="sink-ctrl-label">
+        max α&nbsp;<input type="range" id="srMaxAlpha" min="0.05" max="1.00" step="0.01" value="0.85">
+        <span class="sink-val" id="srMaxAlphaVal">0.85</span>
+      </label>
+      <label class="sink-ctrl-label">
+        sink min opacity&nbsp;<input type="range" id="srSinkMinOp" min="0.00" max="0.80" step="0.01" value="0.10">
+        <span class="sink-val" id="srSinkMinOpVal">0.10</span>
+      </label>
+      <label class="sink-ctrl-label">
+        contrast&nbsp;<input type="range" id="srContrast" min="0.25" max="4.00" step="0.05" value="1.50">
+        <span class="sink-val" id="srContrastVal">1.50</span>
+      </label>
+      <label class="sink-ctrl-label">
+        viz radius&nbsp;<input type="range" id="srVizR" min="0" max="2" step="1" value="1">
+        <span class="sink-val" id="srVizRVal">1</span>
+      </label>
+      <label class="sink-ctrl-label">
+        <input type="checkbox" id="srRenorm" checked> renorm
+      </label>
+    </div>
+  </div>
+
+  <div class="sink-text-wrap" id="srText">
+    <div class="sink-loading">Loading…</div>
+  </div>
+
+</section>
+
+<div id="status">Loading…</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     Short-form comparison
+     ══════════════════════════════════════════════════════════ -->
+<div style="max-width:960px;margin:0 auto 0;border-left:2px solid var(--accent);padding-left:1.25rem;margin-bottom:1.25rem;">
+  <h2 style="font-family:'IBM Plex Mono',monospace;font-size:clamp(1rem,2vw,1.35rem);font-weight:500;color:var(--text);letter-spacing:-.02em;">Evaluation on Very-Long LibriSpeech Benchmark</h2>
+  <p style="margin-top:.4rem;font-size:.83rem;color:var(--sub);line-height:1.6;max-width:600px;">10-second excerpts extracted at various positions from runs up to one hour long.
+     All models receive the same text and speaker prompt.
+     Baselines suffer from <strong style="color:var(--text);font-weight:500;">speaker drift</strong>,
+     <strong style="color:var(--text);font-weight:500;">error accumulation</strong>,
+     or a hard architectural limit on context length.</p>
+</div>
+
+<div id="app"></div>
+
+<!-- ══════════════════════════════════════════════════════════
+     SEED Benchmark Section
+     ══════════════════════════════════════════════════════════ -->
+<section id="seed-section">
+
+  <div class="seed-heading">
+    <h2>Evaluation on SEED-TTS Benchmark</h2>
+    <p>Zero-shot TTS evaluation on the <a href="https://arxiv.org/abs/2406.02430" target="_blank" style="color:var(--accent);text-decoration:none;border-bottom:1px solid #2a4a80;">SEED-TTS benchmark</a>.
+       Each row corresponds to one test utterance; columns show outputs from each model.
+       The target transcript is shown for convenience.</p>
+  </div>
+
+  <div id="seed-app">
+    <div class="seed-status" id="seed-status">Loading samples…</div>
+  </div>
+
+</section>
+
+<script>
+// ── single audio manager ────────────────────────────────────────────────────
+const AM = (() => {
+  let cur = null;
+  return {
+    play(audio) {
+      if (cur && cur !== audio) { cur.pause(); cur.currentTime = 0; }
+      cur = audio;
+      audio.play();
+    },
+  };
+})();
+
+const PLAY_ICON  = `<svg viewBox="0 0 10 12" fill="currentColor"><polygon points="0,0 10,6 0,12"/></svg>`;
+const PAUSE_ICON = `<svg viewBox="0 0 10 12" fill="currentColor"><rect x="0" y="0" width="3.5" height="12"/><rect x="6.5" y="0" width="3.5" height="12"/></svg>`;
+
+function makeAudioCell(file) {
+  const td = document.createElement('td');
+  td.className = 'audio-cell';
+
+  if (!file) {
+    const s = document.createElement('span');
+    s.className = 'unavailable';
+    s.textContent = '—';
+    td.appendChild(s);
+    return td;
+  }
+
+  const audio = new Audio(file);
+  audio.preload = 'none';
+
+  const wrap = document.createElement('div');
+  wrap.className = 'audio-wrap';
+
+  const btn  = document.createElement('button');
+  btn.className = 'play-btn';
+  btn.setAttribute('aria-label', 'Play');
+  btn.innerHTML = PLAY_ICON;
+
+  const bar  = document.createElement('div');  bar.className  = 'progress-bar';
+  const fill = document.createElement('div');  fill.className = 'progress-fill';
+  bar.appendChild(fill);
+
+  btn.addEventListener('click', () => {
+    if (audio.paused) { AM.play(audio); btn.innerHTML = PAUSE_ICON; }
+    else              { audio.pause();  btn.innerHTML = PLAY_ICON;  }
+  });
+  audio.addEventListener('timeupdate', () => {
+    if (audio.duration) fill.style.width = (audio.currentTime / audio.duration * 100) + '%';
+  });
+  audio.addEventListener('ended', () => { btn.innerHTML = PLAY_ICON; fill.style.width = '0%'; });
+  audio.addEventListener('pause', () => { if (!audio.ended) btn.innerHTML = PLAY_ICON; });
+  bar.addEventListener('click', e => {
+    if (!audio.duration) return;
+    const r = bar.getBoundingClientRect();
+    audio.currentTime = (e.clientX - r.left) / r.width * audio.duration;
+  });
+
+  wrap.appendChild(btn);
+  wrap.appendChild(bar);
+  td.appendChild(wrap);
+  return td;
+}
+
+// ── build one example panel from its manifest ───────────────────────────────
+function buildPanel(manifest, baseFolder) {
+  const panel = document.createElement('div');
+  panel.className = 'example-panel';
+
+  // prompt
+  if (manifest.prompt) {
+    const pb = document.createElement('div');
+    pb.className = 'prompt-block';
+    pb.innerHTML = `<span class="prompt-label">SPEAKER PROMPT</span>`;
+    const aud = document.createElement('audio');
+    aud.controls = true;
+    aud.src = `${baseFolder}/${manifest.prompt}`;
+    pb.appendChild(aud);
+    panel.appendChild(pb);
+  }
+
+  const wrap  = document.createElement('div');  wrap.className  = 'table-wrap';
+  const table = document.createElement('table');
+
+  const checkpointEntries = Object.entries(manifest.checkpoints)
+    .sort((a, b) => a[1].seconds - b[1].seconds);
+
+  const stems = checkpointEntries.length
+    ? Object.keys(checkpointEntries[0][1].models) : [];
+
+  // thead
+  const thead = document.createElement('thead');
+  const hr    = document.createElement('tr');
+  const thM   = document.createElement('th');
+  thM.textContent = 'Model';
+  hr.appendChild(thM);
+  checkpointEntries.forEach(([label, cp]) => {
+    const th = document.createElement('th');
+    const m  = cp.seconds / 60;
+    th.textContent = m >= 1
+      ? `${Number.isInteger(m) ? m : Math.round(m)} min`
+      : `${cp.seconds}s`;
+    hr.appendChild(th);
+  });
+  thead.appendChild(hr);
+  table.appendChild(thead);
+
+  // tbody
+  const tbody = document.createElement('tbody');
+  stems.forEach(stem => {
+    const tr      = document.createElement('tr');
+    const first   = checkpointEntries[0][1].models[stem] || {};
+    const isOurs  = (first.display || '').includes('ours');
+
+    const tdName  = document.createElement('td');
+    tdName.className = 'model-name';
+    const nameSpan = document.createElement('span');
+    if (isOurs) nameSpan.className = 'ours';
+    nameSpan.textContent = first.display || stem;
+    tdName.appendChild(nameSpan);
+    tr.appendChild(tdName);
+
+    checkpointEntries.forEach(([label, cp]) => {
+      const m = cp.models[stem] || {};
+      const file = m.available ? `${baseFolder}/${m.file}` : null;
+      tr.appendChild(makeAudioCell(file));
+    });
+
+    tbody.appendChild(tr);
+  });
+
+  table.appendChild(tbody);
+  wrap.appendChild(table);
+  panel.appendChild(wrap);
+  return panel;
+}
+
+// ── main ────────────────────────────────────────────────────────────────────
+async function main() {
+  const statusEl = document.getElementById('status');
+  const appEl    = document.getElementById('app');
+
+  const err = msg => {
+    statusEl.className = 'error';
+    statusEl.textContent = msg;
+  };
+
+  // 1. load examples index
+  let examples;
+  try {
+    const r = await fetch('examples.json');
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    examples = await r.json();
+  } catch (e) {
+    return err(`Could not load examples.json — ${e.message}. Serve with: python -m http.server 8000`);
+  }
+
+  if (!examples.length) return err('examples.json is empty.');
+
+  // 2. load all manifests in parallel
+  const manifests = await Promise.all(examples.map(async ex => {
+    const url = ex.folder === '.' ? 'manifest.json' : `${ex.folder}/manifest.json`;
+    const r   = await fetch(url);
+    if (!r.ok) throw new Error(`Could not load ${url}`);
+    return r.json();
+  }));
+
+  statusEl.style.display = 'none';
+
+  const isSingle = examples.length === 1 && examples[0].folder === '.';
+
+  // 3. tabs (only if multiple examples)
+  if (!isSingle) {
+    const tabsWrap = document.createElement('div');
+    tabsWrap.className = 'tabs-wrap';
+    const tabsLabel = document.createElement('div');
+    tabsLabel.className = 'tabs-label';
+    tabsLabel.textContent = 'Select example';
+    const tabs = document.createElement('div');
+    tabs.className = 'tabs';
+
+    examples.forEach((ex, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'tab-btn' + (i === 0 ? ' active' : '');
+      btn.textContent = ex.title || ex.folder;
+      if (ex.description) btn.title = ex.description;
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.example-panel').forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById(`panel-${i}`).classList.add('active');
+      });
+      tabs.appendChild(btn);
+    });
+
+    tabsWrap.appendChild(tabsLabel);
+    tabsWrap.appendChild(tabs);
+    appEl.appendChild(tabsWrap);
+  }
+
+  // 4. panels
+  examples.forEach((ex, i) => {
+    const baseFolder = ex.folder === '.' ? '.' : ex.folder;
+    const panel = buildPanel(manifests[i], baseFolder);
+    panel.id = `panel-${i}`;
+    if (i === 0) panel.classList.add('active');
+    appEl.appendChild(panel);
+  });
+}
+
+main();
+
+// ════════════════════════════════════════════════════════════
+// SEED Benchmark Section
+// ════════════════════════════════════════════════════════════
+(async function seedMain() {
+
+  const SEED_BASE   = 'seed';
+  const SAMPLES_URL = `${SEED_BASE}/samples.json`;
+
+  // Hardcoded stems (also accepted from samples.json if present)
+  const DEFAULT_STEMS = [
+    23, 47, 112, 158, 203, 267, 334, 389, 412, 451,
+    534, 589, 623, 701, 756, 812, 867, 903, 945, 988,
+  ];
+
+  const seedApp    = document.getElementById('seed-app');
+  const seedStatus = document.getElementById('seed-status');
+
+  function seedErr(msg) {
+    seedStatus.className = 'seed-status error';
+    seedStatus.textContent = msg;
+  }
+
+  // ── 1. load samples list ──────────────────────────────────
+  let stems = DEFAULT_STEMS;
+  try {
+    const r = await fetch(SAMPLES_URL, { cache: 'no-store' });
+    if (r.ok) {
+      const data = await r.json();
+      if (Array.isArray(data) && data.length) stems = data;
+    }
+    // if not found, silently fall back to DEFAULT_STEMS
+  } catch (_) { /* use defaults */ }
+
+  // ── 2. load model list ────────────────────────────────────
+  // Try seed/models.json; fallback: discover by listing a known stem
+  let models = []; // [{label, folder}]
+  try {
+    const r = await fetch(`${SEED_BASE}/models.json`, { cache: 'no-store' });
+    if (r.ok) {
+      const data = await r.json();
+      if (Array.isArray(data) && data.length) {
+        // legacy array format
+        models = data.map(f => ({ label: f, folder: f }));
+      } else if (data && typeof data === 'object') {
+        models = Object.entries(data).map(([label, folder]) => ({ label, folder }));
+      }
+    }
+  } catch (_) { /* ignored */ }
+
+  // ── 3. load transcripts (best-effort) ────────────────────
+  // seed/target/{stem}.txt
+  const transcripts = {};
+  await Promise.all(stems.map(async stem => {
+    try {
+      const r = await fetch(`${SEED_BASE}/target/${stem}.txt`, { cache: 'no-store' });
+      if (r.ok) transcripts[stem] = (await r.text()).trim();
+    } catch (_) { /* no transcript */ }
+  }));
+
+  seedStatus.style.display = 'none';
+
+  // ── 4. build table ────────────────────────────────────────
+  const wrap  = document.createElement('div');
+  wrap.className = 'seed-table-wrap';
+
+  const table = document.createElement('table');
+  table.className = 'seed-table';
+
+  // thead
+  const thead = table.createTHead();
+  const hrow  = thead.insertRow();
+
+  const thPrompt = document.createElement('th');
+  thPrompt.textContent = 'Prompt';
+  thPrompt.className   = 'col-prompt';
+  hrow.appendChild(thPrompt);
+
+  const thTxt  = document.createElement('th');
+  thTxt.textContent = 'Target text';
+  thTxt.className   = 'col-text';
+  hrow.appendChild(thTxt);
+
+  const thTarget = document.createElement('th');
+  thTarget.textContent = 'Target';
+  thTarget.className   = 'col-target';
+  hrow.appendChild(thTarget);
+
+  // model columns — if models list empty we'll add columns dynamically below
+  models.forEach(mdl => {
+    const th = document.createElement('th');
+    th.className   = 'col-model';
+    th.textContent = mdl.label;
+    hrow.appendChild(th);
+  });
+
+  // tbody
+  const tbody = table.createTBody();
+
+  stems.forEach(stem => {
+    const tr = tbody.insertRow();
+
+    // prompt audio cell
+    const tdPrompt = makeSeedAudioCell(`${SEED_BASE}/prompt/${stem}.wav`);
+    tdPrompt.className = 'seed-prompt';
+    tr.appendChild(tdPrompt);
+
+    // target text cell
+    const tdTxt = document.createElement('td');
+    tdTxt.className = 'seed-text';
+    tdTxt.textContent = transcripts[stem] || '';
+    tr.appendChild(tdTxt);
+
+    // target audio cell
+    const tdTarget = makeSeedAudioCell(`${SEED_BASE}/target/${stem}.wav`);
+    tdTarget.className = 'seed-target';
+    tr.appendChild(tdTarget);
+
+    // audio cells for each model
+    models.forEach(mdl => {
+      tr.appendChild(makeSeedAudioCell(`${SEED_BASE}/${mdl.folder}/${stem}.wav`));
+    });
+
+    // If no models defined yet, at least render a placeholder column
+    if (!models.length) {
+      const td = document.createElement('td');
+      td.className = 'seed-audio';
+      const s = document.createElement('span');
+      s.className   = 'unavailable';
+      s.textContent = 'no models';
+      td.appendChild(s);
+      tr.appendChild(td);
+    }
+  });
+
+  wrap.appendChild(table);
+  seedApp.appendChild(wrap);
+
+  // ── helper: seed audio cell ───────────────────────────────
+  function makeSeedAudioCell(filePath) {
+    const td = document.createElement('td');
+    td.className = 'seed-audio';
+
+    const audio = new Audio(filePath);
+    audio.preload = 'none';
+
+    const wrap = document.createElement('div');
+    wrap.className = 'audio-wrap';
+
+    const btn  = document.createElement('button');
+    btn.className = 'play-btn';
+    btn.setAttribute('aria-label', 'Play');
+    btn.innerHTML = PLAY_ICON;
+
+    const bar  = document.createElement('div');  bar.className  = 'progress-bar';
+    const fill = document.createElement('div');  fill.className = 'progress-fill';
+    bar.appendChild(fill);
+
+    btn.addEventListener('click', () => {
+      if (audio.paused) { AM.play(audio); btn.innerHTML = PAUSE_ICON; }
+      else              { audio.pause();  btn.innerHTML = PLAY_ICON;  }
+    });
+    audio.addEventListener('timeupdate', () => {
+      if (audio.duration) fill.style.width = (audio.currentTime / audio.duration * 100) + '%';
+    });
+    audio.addEventListener('ended', () => { btn.innerHTML = PLAY_ICON; fill.style.width = '0%'; });
+    audio.addEventListener('pause', () => { if (!audio.ended) btn.innerHTML = PLAY_ICON; });
+    bar.addEventListener('click', e => {
+      if (!audio.duration) return;
+      const rect = bar.getBoundingClientRect();
+      audio.currentTime = (e.clientX - rect.left) / rect.width * audio.duration;
+    });
+
+    // handle missing file gracefully
+    audio.addEventListener('error', () => {
+      wrap.innerHTML = '';
+      const s = document.createElement('span');
+      s.className = 'unavailable';
+      s.textContent = '—';
+      wrap.appendChild(s);
+    });
+
+    wrap.appendChild(btn);
+    wrap.appendChild(bar);
+    td.appendChild(wrap);
+    return td;
+  }
+
+})();
+
+// ════════════════════════════════════════════════════════════
+// Sink-aligned reader
+// ════════════════════════════════════════════════════════════
+(function () {
+
+  // ── element refs ─────────────────────────────────────────
+  const srAudio      = document.getElementById('srAudio');
+  const srTakeTabs   = document.getElementById('srTakeTabs');
+  const srFollow     = document.getElementById('srFollow');
+  const srSinkOpEl   = document.getElementById('srSinkOpacity');
+  const srOffsetEl   = document.getElementById('srOffset');
+  const srMaxAlphaEl = document.getElementById('srMaxAlpha');
+  const srMaxAlphaV  = document.getElementById('srMaxAlphaVal');
+  const srMinOpEl    = document.getElementById('srSinkMinOp');
+  const srMinOpV     = document.getElementById('srSinkMinOpVal');
+  const srContrastEl = document.getElementById('srContrast');
+  const srContrastV  = document.getElementById('srContrastVal');
+  const srVizREl     = document.getElementById('srVizR');
+  const srVizRV      = document.getElementById('srVizRVal');
+  const srRenormEl   = document.getElementById('srRenorm');
+  const srTextBox    = document.getElementById('srText');
+  const paramsToggle = document.getElementById('sinkParamsToggle');
+  const paramsDiv    = document.getElementById('sinkParams');
+
+  // ── state ────────────────────────────────────────────────
+  let SR_DATA = null, SR_MANIFEST = null, SR_TAKE = null;
+  let srSpans = [], srLastStep = -1, srLastCur = -1, srForce = false;
+  let srSinkStats = { lo: 0, hi: 1 };
+  const srPainted = [];
+
+  // ── params toggle ─────────────────────────────────────────
+  paramsToggle.addEventListener('click', () => {
+    const v = paramsDiv.classList.toggle('visible');
+    paramsToggle.textContent = v ? 'params ▴' : 'params ▾';
+  });
+
+  // ── helpers ───────────────────────────────────────────────
+  function clamp01(x) { return Math.max(0, Math.min(1, x)); }
+  function lerp(a, b, t) { return a + (b - a) * clamp01(t); }
+  function smoothstep(t) { t = clamp01(t); return t * t * (3 - 2 * t); }
+
+  function percentile(xs, p) {
+    if (!xs.length) return 0;
+    const s = [...xs].sort((a, b) => a - b);
+    return s[Math.min(s.length - 1, Math.max(0, Math.floor(p * s.length)))];
+  }
+
+  function computeSinkStats() {
+    if (!SR_DATA.step_text_frac || !SR_DATA.step_text_frac.length) {
+      srSinkStats = { lo: 0, hi: 1 }; return;
+    }
+    const sinks = SR_DATA.step_text_frac.map(tf => clamp01(1.0 - tf));
+    let lo = percentile(sinks, 0.05), hi = percentile(sinks, 0.95);
+    if (hi - lo < 0.001) { lo = Math.max(0, lo - 0.05); hi = Math.min(1, hi + 0.05); }
+    srSinkStats = { lo, hi };
+  }
+
+  function normSink(sink) {
+    const { lo, hi } = srSinkStats;
+    return clamp01((sink - lo) / Math.max(1e-6, hi - lo));
+  }
+
+  function colorFromSink(sink) {
+    const contrast = parseFloat(srContrastEl.value) || 1.5;
+    let t = normSink(sink);
+    t = Math.pow(t, 1.0 / contrast);
+    t = smoothstep(t);
+    // accent blue (#1a6ef5) for active reading, muted for sink
+    const activeRGB = [77, 143, 255];
+    const sinkRGB   = [77, 143, 255];
+    return {
+      r: Math.round(lerp(activeRGB[0], sinkRGB[0], t)),
+      g: Math.round(lerp(activeRGB[1], sinkRGB[1], t)),
+      b: Math.round(lerp(activeRGB[2], sinkRGB[2], t)),
+      norm: t,
+    };
+  }
+
+  function sinkOpMult(sink) {
+    if (!srSinkOpEl.checked) return 1.0;
+    const minOp = clamp01(parseFloat(srMinOpEl.value) || 0.1);
+    return minOp + (1.0 - minOp) * (1.0 - normSink(sink));
+  }
+
+  function stepAt(time) {
+    const st = SR_DATA.step_time;
+    let lo = 0, hi = st.length - 1, ans = 0;
+    while (lo <= hi) {
+      const mid = (lo + hi) >> 1;
+      if (st[mid] <= time) { ans = mid; lo = mid + 1; } else { hi = mid - 1; }
+    }
+    return ans;
+  }
+
+  function updateLabels() {
+    srMaxAlphaV.textContent  = Number(srMaxAlphaEl.value).toFixed(2);
+    srMinOpV.textContent     = Number(srMinOpEl.value).toFixed(2);
+    srContrastV.textContent  = Number(srContrastEl.value).toFixed(2);
+    srVizRV.textContent      = String(parseInt(srVizREl.value, 10));
+  }
+
+  // ── boot ──────────────────────────────────────────────────
+  fetch('manifest.json', { cache: 'no-store' })
+    .then(r => { if (!r.ok) throw new Error('no manifest'); return r.json(); })
+    .then(m => {
+      SR_MANIFEST = m;
+      populateSrTakes(m);
+      const want = decodeURIComponent((location.hash || '').slice(1));
+      const items = m.items || [];
+      const chosen = items.find(it => it.name === want) || items[0];
+      if (!chosen) { srTextBox.innerHTML = '<div class="sink-loading">manifest.json has no items.</div>'; return; }
+      // activate the matching tab button
+      srTakeTabs.querySelectorAll('.tab-btn').forEach(b => {
+        if (b.textContent === (chosen.title || chosen.name)) b.classList.add('active');
+        else b.classList.remove('active');
+      });
+      loadSrTake(chosen);
+    })
+    .catch(() => {
+      srTakeTabs.style.display = 'none';
+      loadSrTake({ name: 'karaoke', title: 'karaoke', json: 'karaoke.json', audio: 'audio.webm' });
+    });
+
+  function populateSrTakes(manifest) {
+    srTakeTabs.innerHTML = '';
+    for (const it of (manifest.items || [])) {
+      const btn = document.createElement('button');
+      btn.className = 'tab-btn';
+      btn.textContent = it.title || it.name;
+      btn.addEventListener('click', () => {
+        srTakeTabs.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        location.hash = encodeURIComponent(it.name);
+        loadSrTake(it);
+      });
+      srTakeTabs.appendChild(btn);
+    }
+    const first = srTakeTabs.querySelector('.tab-btn');
+    if (first) first.classList.add('active');
+  }
+
+  function loadSrTake(item) {
+    SR_TAKE = item;
+    SR_DATA = null; srSpans = []; srPainted.length = 0;
+    srLastStep = -1; srLastCur = -1; srForce = true;
+    srTextBox.innerHTML = '<div class="sink-loading">Loading…</div>';
+    srAudio.pause(); srAudio.currentTime = 0;
+
+    fetch(item.json, { cache: 'no-store' })
+      .then(r => { if (!r.ok) throw new Error('failed: ' + item.json); return r.json(); })
+      .then(d => {
+        SR_DATA = d;
+        const audioSrc = d.audio || item.audio || (item.name + '.webm');
+        srAudio.src = audioSrc; srAudio.load();
+        buildSr();
+      })
+      .catch(e => {
+        srTextBox.innerHTML = `<div class="sink-loading">Could not load ${item.json} — serve over http.</div>`;
+      });
+  }
+
+  let srListenersWired = false;
+
+  function buildSr() {
+    srTextBox.innerHTML = '';
+    srSpans = [];
+
+    SR_DATA.tokens.forEach((tok, i) => {
+      const span = document.createElement('span');
+      span.className = 'sink-tok future';
+      span.textContent = tok;
+      span.title = `t=${SR_DATA.start[i].toFixed(2)}s`;
+      span.onclick = () => {
+        const off = parseFloat(srOffsetEl.value) || 0;
+        srAudio.currentTime = Math.max(0, SR_DATA.start[i] - off);
+        srAudio.play();
+      };
+      srTextBox.appendChild(span);
+      srSpans.push(span);
+    });
+
+    computeSinkStats();
+    srVizREl.max = String(SR_DATA.R);
+    if (parseInt(srVizREl.value, 10) > SR_DATA.R) srVizREl.value = String(SR_DATA.R);
+
+    if (!srListenersWired) {
+      for (const el of [srMaxAlphaEl, srMinOpEl, srContrastEl, srOffsetEl,
+                        srSinkOpEl, srVizREl, srRenormEl]) {
+        el.addEventListener('input',  () => { updateLabels(); srForce = true; });
+        el.addEventListener('change', () => { updateLabels(); srForce = true; });
+      }
+      srListenersWired = true;
+    }
+
+    updateLabels();
+    srForce = true;
+  }
+
+  // ── render loop ───────────────────────────────────────────
+  function renderSr() {
+    if (!SR_DATA) { requestAnimationFrame(renderSr); return; }
+
+    const off  = parseFloat(srOffsetEl.value) || 0;
+    const step = stepAt(srAudio.currentTime + off);
+
+    if (step !== srLastStep || srForce) {
+      srForce = false;
+
+      // clear painted
+      for (const i of srPainted) {
+        if (i >= 0 && i < srSpans.length) srSpans[i].style.background = 'transparent';
+      }
+      srPainted.length = 0;
+
+      const phi      = SR_DATA.step_phi[step];
+      const win      = SR_DATA.step_win[step];
+      const R        = SR_DATA.R;
+      const textFrac = SR_DATA.step_text_frac ? clamp01(SR_DATA.step_text_frac[step]) : 1.0;
+      const sink     = clamp01(1.0 - textFrac);
+      const sinkNorm = normSink(sink);
+      const maxAlpha = parseFloat(srMaxAlphaEl.value) || 0.85;
+      const c        = colorFromSink(sink);
+      const sinkMult = sinkOpMult(sink);
+
+      const r    = Math.min(Math.max(0, parseInt(srVizREl.value, 10) || 0), R);
+      const kLo  = R - r, kHi = R + r;
+
+      let visPeak = 1.0;
+      if (srRenormEl.checked) {
+        let m = 0;
+        for (let k = kLo; k <= kHi; k++) {
+          const ki = phi - R + k;
+          if (ki < 0) continue;
+          const v = clamp01(win[k]);
+          if (v > m) m = v;
+        }
+        visPeak = m > 0 ? m : 1.0;
+      }
+
+      for (let k = kLo; k <= kHi; k++) {
+        const ki = phi - R + k;
+        if (ki < 0) continue;
+        const wv    = clamp01(win[k]) / visPeak;
+        const alpha = clamp01(wv) * maxAlpha * sinkMult;
+        if (alpha < 0.01) continue;
+        const bg = `rgba(${c.r},${c.g},${c.b},${alpha})`;
+        for (const ti of [2 * ki, 2 * ki + 1]) {
+          if (ti >= 0 && ti < srSpans.length) {
+            srSpans[ti].style.background = bg;
+            srPainted.push(ti);
+          }
+        }
+      }
+
+      // future class
+      const cutoff = Math.min(phi * 2 + 1, srSpans.length - 1);
+      for (let i = 0; i < srSpans.length; i++) {
+        if (i <= cutoff) srSpans[i].classList.remove('future');
+        else             srSpans[i].classList.add('future');
+      }
+
+      // current token
+      const curTok = 2 * phi;
+      if (curTok !== srLastCur) {
+        if (srLastCur >= 0 && srLastCur < srSpans.length)
+          srSpans[srLastCur].classList.remove('current');
+        if (curTok >= 0 && curTok < srSpans.length) {
+          srSpans[curTok].classList.add('current');
+          if (srFollow.checked)
+            srSpans[curTok].scrollIntoView({ block: 'center', behavior: 'smooth' });
+        }
+        srLastCur = curTok;
+      }
+
+      srLastStep = step;
+    }
+
+    requestAnimationFrame(renderSr);
+  }
+
+  requestAnimationFrame(renderSr);
+
+})(); // end sink reader IIFE
+</script>
+</body>
+</html>

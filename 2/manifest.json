@@ -1,0 +1,148 @@
+{
+  "title": "2",
+  "description": "",
+  "prompt": "prompt.wav",
+  "sample_duration": 9,
+  "checkpoints": {
+    "20s": {
+      "seconds": 20,
+      "models": {
+        "psw_speech": {
+          "display": "PSW-Speech (ours)",
+          "file": "20s/psw_speech.wav",
+          "available": true,
+          "model_duration_min": 121.3
+        },
+        "vibevoice": {
+          "display": "VibeVoice",
+          "file": "20s/vibevoice.wav",
+          "available": true,
+          "model_duration_min": 50.1
+        },
+        "voxcpm": {
+          "display": "VoxCPM",
+          "file": "20s/voxcpm.wav",
+          "available": true,
+          "model_duration_min": 4.7
+        },
+        "voxtream": {
+          "display": "VoXtream",
+          "file": "20s/voxtream.wav",
+          "available": true,
+          "model_duration_min": 1.0
+        },
+        "voicestar": {
+          "display": "VoiceStar",
+          "file": "20s/voicestar.wav",
+          "available": true,
+          "model_duration_min": 0.6
+        }
+      }
+    },
+    "3min": {
+      "seconds": 180,
+      "models": {
+        "psw_speech": {
+          "display": "PSW-Speech (ours)",
+          "file": "3min/psw_speech.wav",
+          "available": true,
+          "model_duration_min": 121.3
+        },
+        "vibevoice": {
+          "display": "VibeVoice",
+          "file": "3min/vibevoice.wav",
+          "available": true,
+          "model_duration_min": 50.1
+        },
+        "voxcpm": {
+          "display": "VoxCPM",
+          "file": "3min/voxcpm.wav",
+          "available": true,
+          "model_duration_min": 4.7
+        },
+        "voxtream": {
+          "display": "VoXtream",
+          "file": null,
+          "available": false,
+          "model_duration_min": 1.0
+        },
+        "voicestar": {
+          "display": "VoiceStar",
+          "file": null,
+          "available": false,
+          "model_duration_min": 0.6
+        }
+      }
+    },
+    "45min": {
+      "seconds": 2700,
+      "models": {
+        "psw_speech": {
+          "display": "PSW-Speech (ours)",
+          "file": "45min/psw_speech.wav",
+          "available": true,
+          "model_duration_min": 121.3
+        },
+        "vibevoice": {
+          "display": "VibeVoice",
+          "file": "45min/vibevoice.wav",
+          "available": true,
+          "model_duration_min": 50.1
+        },
+        "voxcpm": {
+          "display": "VoxCPM",
+          "file": null,
+          "available": false,
+          "model_duration_min": 4.7
+        },
+        "voxtream": {
+          "display": "VoXtream",
+          "file": null,
+          "available": false,
+          "model_duration_min": 1.0
+        },
+        "voicestar": {
+          "display": "VoiceStar",
+          "file": null,
+          "available": false,
+          "model_duration_min": 0.6
+        }
+      }
+    },
+    "90min": {
+      "seconds": 5400,
+      "models": {
+        "psw_speech": {
+          "display": "PSW-Speech (ours)",
+          "file": "90min/psw_speech.wav",
+          "available": true,
+          "model_duration_min": 121.3
+        },
+        "vibevoice": {
+          "display": "VibeVoice",
+          "file": null,
+          "available": false,
+          "model_duration_min": 50.1
+        },
+        "voxcpm": {
+          "display": "VoxCPM",
+          "file": null,
+          "available": false,
+          "model_duration_min": 4.7
+        },
+        "voxtream": {
+          "display": "VoXtream",
+          "file": null,
+          "available": false,
+          "model_duration_min": 1.0
+        },
+        "voicestar": {
+          "display": "VoiceStar",
+          "file": null,
+          "available": false,
+          "model_duration_min": 0.6
+        }
+      }
+    }
+  }
+}

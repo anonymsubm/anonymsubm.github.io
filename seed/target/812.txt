@@ -1,0 +1,1 @@
+Factors - In this mode you find factors divisible by the number given.

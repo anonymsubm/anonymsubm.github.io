@@ -1,0 +1,8 @@
+{
+  "PSW-Speech (ours)": "psw_speech",
+  "Transformer (ours)": "transformer",
+  "VibeVoice": "vibevoice",
+  "VoxCPM": "voxcpm",
+  "VoxTream": "voxtream",
+  "VoiceStar": "voicestar"
+}

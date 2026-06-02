@@ -1,0 +1,1 @@
+A process assembly represents a process that will use classes defined in library assemblies.
